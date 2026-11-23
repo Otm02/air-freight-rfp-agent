@@ -100,3 +100,17 @@ Per standing project rule #6, every domain or engineering ambiguity encountered 
   5. Deal Agent classifies customer sentiment as `COUNTER_OFFER` or `AMBIGUOUS` (or `ACCEPT` with `confidence < 0.85`).
 - **Rationale:** Enforces Standing Rule #2 ("never a silent guess") and ensures every ambiguous or malformed model response becomes an explicit, auditable human decision card.
 - **Reversibility:** High — thresholds (`CONFIDENCE_THRESHOLD = 0.85`, pricing bounds) live in `src/lib/config/thresholds.ts`.
+
+
+## 12. Package Manager & Unit Test Runner on WSL UNC Paths
+
+- **Assumption:** The project uses `npm` (`package-lock.json`) with `--script-shell=powershell.exe` on Windows hosts and Node 22's built-in `node:test` + `node:assert/strict` executed via `tsx --test` for unit and integration tests (while reserving Playwright for browser E2E testing in Phase 6).
+- **Rationale:** On Windows workspaces stored inside WSL (`\\wsl.localhost\Ubuntu-24.04\...`), Windows `pnpm` fails with UNC symlink (`ERR_PNPM_EISDIR`) and `copy_on_write` volume-info panics, default `npm` lifecycle scripts fail because `cmd.exe` rejects UNC working directories, and `vitest` (`vite-node/dist/utils.mjs` + `pathe`) throws a startup regex/path crash when `process.cwd()[0]` is `"\\"`. Node 22 `node:test` + `tsx --test` and `npm --script-shell=powershell.exe` operate natively across WSL UNC, Windows NTFS, Linux, and macOS without native path-rewriting workarounds.
+- **Reversibility:** High — standard `node:test` assertions have zero proprietary lock-in and remain portable across any Node 20+ runtime.
+
+
+## 13. Namespace-Aware `.xlsx` Parsing with `jszip` + `saxes`
+
+- **Assumption:** Excel workbook reading in `src/domain/xlsx-reader.ts` uses `jszip` + `saxes` (`SaxesParser({ xmlns: true })`) matching elements/attributes by local XML name rather than `exceljs`.
+- **Rationale:** `data/Air_Freight_RFP_Mock_Data.xlsx` uses namespace-prefixed SpreadsheetML tags (`<x:workbook xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`, `<x:worksheet>`, `<x:c t="str"><x:v>...</x:v></x:c>`) and UTF-8 BOMs in `.rels`, which cause `exceljs@4.4.0` to return `undefined` from `parseWorkbook` (`Cannot read properties of undefined (reading 'sheets')`). A lightweight `jszip` + `saxes` parser handles both `x:`-prefixed (ClosedXML/OpenXML SDK) and unprefixed `.xlsx` workbooks, supports shared strings, inline strings, formula strings (`t="str"`), and sparse column refs, eliminates `exceljs`'s deprecated/vulnerable transitive dependencies, and parses workbooks in milliseconds.
+- **Reversibility:** High — `src/domain/loader.ts` isolates workbook extraction behind `readXlsxWorkbook`, leaving all validation and `LoadedDataset` contracts unchanged.
