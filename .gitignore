@@ -1,0 +1,29 @@
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# SQLite / local databases
+data/*.db
+data/*.db-*
+*.sqlite
+*.sqlite-*
+
+# Python / Test / OS artifacts
+__pycache__/
+*.pyc
+.venv/
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db
