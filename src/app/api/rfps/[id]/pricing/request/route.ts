@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { getRfpWorkspace, requestPricing } from "@/orchestrator";
@@ -31,7 +31,10 @@ export async function POST(
       rawBody = {};
     }
     const parsed = RequestPricingSchema.safeParse(rawBody);
-    const llmMode = parsed.success ? parseLlmMode(parsed.data?.llmMode) : undefined;
+    const llmMode = getLlmModeFromRequest(
+      request,
+      parsed.success ? parsed.data?.llmMode : undefined,
+    );
 
     const { db } = await getDefaultDatabase();
     await requestPricing(db, rfpId, { llmMode });

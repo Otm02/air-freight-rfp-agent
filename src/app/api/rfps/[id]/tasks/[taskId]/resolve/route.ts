@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { getRfpWorkspace, resolveFollowUpTask } from "@/orchestrator";
@@ -45,7 +45,7 @@ export async function POST(
     const workspace = await getRfpWorkspace(
       db,
       rfpId,
-      parseLlmMode(parsed.data.llmMode),
+      getLlmModeFromRequest(request, parsed.data.llmMode),
     );
     return NextResponse.json(workspace);
   } catch (err) {

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
-  parseLlmMode,
 } from "@/lib/api-helpers";
 import {
   createRfp,
@@ -45,8 +45,7 @@ const CreateCustomSchema = z.object({
 
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const llmMode = parseLlmMode(url.searchParams.get("llmMode"));
+    const llmMode = getLlmModeFromRequest(request);
     const { db } = await getDefaultDatabase();
     const rfps = await listRfps(db, llmMode);
     const activeLlm = getActiveLlmInfo(llmMode);
@@ -71,7 +70,7 @@ export async function POST(request: Request) {
         throw new HttpBadRequestError("Missing .xlsx file upload.");
       }
       const bytes = new Uint8Array(await file.arrayBuffer());
-      llmMode = parseLlmMode(formData.get("llmMode"));
+      llmMode = getLlmModeFromRequest(request, formData.get("llmMode"));
       rfpId = await createRfp(db, {
         mode: "xlsx",
         buffer: bytes,
@@ -87,8 +86,8 @@ export async function POST(request: Request) {
       const body: unknown = await request.json();
       const presetParsed = CreatePresetSchema.safeParse(body);
       if (presetParsed.success) {
-        llmMode = presetParsed.data.llmMode;
-        rfpId = await createRfp(db, presetParsed.data);
+        llmMode = getLlmModeFromRequest(request, presetParsed.data.llmMode);
+        rfpId = await createRfp(db, { ...presetParsed.data, llmMode });
       } else {
         const customParsed = CreateCustomSchema.safeParse(body);
         if (!customParsed.success) {
@@ -98,8 +97,8 @@ export async function POST(request: Request) {
               .join("; "),
           );
         }
-        llmMode = customParsed.data.llmMode;
-        rfpId = await createRfp(db, customParsed.data);
+        llmMode = getLlmModeFromRequest(request, customParsed.data.llmMode);
+        rfpId = await createRfp(db, { ...customParsed.data, llmMode });
       }
     }
 

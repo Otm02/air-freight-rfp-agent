@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { clarifyPricing, getRfpWorkspace } from "@/orchestrator";
@@ -33,7 +33,10 @@ export async function POST(
     }
     const parsed = ClarifyPricingSchema.safeParse(rawBody);
     const taskId = parsed.success ? parsed.data?.taskId : undefined;
-    const llmMode = parsed.success ? parseLlmMode(parsed.data?.llmMode) : undefined;
+    const llmMode = getLlmModeFromRequest(
+      request,
+      parsed.success ? parsed.data?.llmMode : undefined,
+    );
 
     const { db } = await getDefaultDatabase();
     await clarifyPricing(db, rfpId, { taskId, llmMode });

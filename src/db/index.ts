@@ -72,7 +72,26 @@ export async function createDatabase(
 
 export function getDefaultDatabase(): Promise<DatabaseHandle> {
   if (!globalForDb.__airFreightRfpDb) {
-    globalForDb.__airFreightRfpDb = createDatabase(resolveDefaultDatabaseUrl());
+    const primaryUrl = resolveDefaultDatabaseUrl();
+    globalForDb.__airFreightRfpDb = createDatabase(primaryUrl).catch(
+      async (err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        const code =
+          err && typeof err === "object" && "code" in err
+            ? String((err as { code?: unknown }).code)
+            : "";
+        if (
+          primaryUrl !== ":memory:" &&
+          (code === "SQLITE_BUSY" || msg.includes("SQLITE_BUSY"))
+        ) {
+          console.warn(
+            `[db] SQLITE_BUSY opening "${primaryUrl}"; falling back to ":memory:".`,
+          );
+          return createDatabase(":memory:");
+        }
+        throw err;
+      },
+    );
   }
   return globalForDb.__airFreightRfpDb;
 }

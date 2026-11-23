@@ -3,9 +3,9 @@ import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import { SERVICE_TYPES } from "@/domain";
 import {
+  getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import {
@@ -75,7 +75,7 @@ export async function POST(
     const workspace = await getRfpWorkspace(
       db,
       rfpId,
-      parseLlmMode(parsed.data.llmMode),
+      getLlmModeFromRequest(request, parsed.data.llmMode),
     );
     return NextResponse.json(workspace);
   } catch (err) {

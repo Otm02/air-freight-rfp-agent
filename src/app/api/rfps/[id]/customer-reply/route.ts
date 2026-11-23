@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { getRfpWorkspace, processCustomerReply } from "@/orchestrator";
@@ -38,18 +38,15 @@ export async function POST(
     }
 
     const { db } = await getDefaultDatabase();
+    const llmMode = getLlmModeFromRequest(request, parsed.data.llmMode);
     await processCustomerReply(db, rfpId, parsed.data.proposalId, {
       scenario: parsed.data.scenario,
       customBody: parsed.data.customBody,
       acceptedLaneCodes: parsed.data.acceptedLaneCodes,
-      llmMode: parseLlmMode(parsed.data.llmMode),
+      llmMode,
     });
 
-    const workspace = await getRfpWorkspace(
-      db,
-      rfpId,
-      parseLlmMode(parsed.data.llmMode),
-    );
+    const workspace = await getRfpWorkspace(db, rfpId, llmMode);
     return NextResponse.json(workspace);
   } catch (err) {
     return handleApiError(err);

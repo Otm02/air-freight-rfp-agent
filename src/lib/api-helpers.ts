@@ -27,6 +27,29 @@ export function parseLlmMode(raw: unknown): LlmModeOverride | undefined {
   return undefined;
 }
 
+export function getLlmModeFromRequest(
+  request: Request,
+  bodyOverride?: unknown,
+): LlmModeOverride | undefined {
+  const fromBody = parseLlmMode(bodyOverride);
+  if (fromBody) {
+    return fromBody;
+  }
+  const url = new URL(request.url);
+  const fromQuery = parseLlmMode(url.searchParams.get("llmMode"));
+  if (fromQuery) {
+    return fromQuery;
+  }
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  for (const part of cookieHeader.split(";")) {
+    const [rawKey, ...rest] = part.trim().split("=");
+    if (rawKey === "rfp_llm_mode") {
+      return parseLlmMode(decodeURIComponent(rest.join("=")));
+    }
+  }
+  return undefined;
+}
+
 export function handleApiError(err: unknown): NextResponse {
   if (err instanceof HttpBadRequestError) {
     return NextResponse.json({ error: err.message }, { status: err.status });

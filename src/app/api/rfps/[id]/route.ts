@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDefaultDatabase } from "@/db";
 import {
+  getLlmModeFromRequest,
   handleApiError,
-  parseLlmMode,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { getRfpWorkspace } from "@/orchestrator";
@@ -16,8 +16,7 @@ export async function GET(
   try {
     const { id } = await context.params;
     const rfpId = parsePositiveIntId(id, "rfpId");
-    const url = new URL(request.url);
-    const llmMode = parseLlmMode(url.searchParams.get("llmMode"));
+    const llmMode = getLlmModeFromRequest(request);
 
     const { db } = await getDefaultDatabase();
     const workspace = await getRfpWorkspace(db, rfpId, llmMode);
