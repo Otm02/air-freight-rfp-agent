@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.env
+.env.local
+.env.*.local
+data/*.db
+data/*.db-*
+out/*.md
+out/*.csv
+out/*.json
+playwright-report
+test-results
+docs/screenshots
+.DS_Store
+Thumbs.db
