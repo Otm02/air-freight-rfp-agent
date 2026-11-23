@@ -155,7 +155,7 @@ export function getActiveLlmInfo(preference?: LlmModeOverride): {
   displayLabel: string;
 } {
   const cfg = resolveProviderConfig({
-    provider: preference ?? "auto",
+    provider: preference,
   });
   if (cfg.provider === "offline") {
     return {
@@ -178,7 +178,7 @@ function buildLlmClient(
   preference?: LlmProviderPreference,
 ): LlmClient {
   return new LlmClient({
-    provider: preference ?? "auto",
+    provider: preference,
     db,
   });
 }
@@ -1306,7 +1306,7 @@ export async function requestPricing(
       recipient: "rfp-response-team@carrier.example",
     },
   });
-  eventCursor = await publishUnseenEventsAfter(db, rfpId, eventCursor);
+  await publishUnseenEventsAfter(db, rfpId, eventCursor);
 
   if (parsed.flagged.length > 0) {
     await setRfpState(
@@ -1453,7 +1453,7 @@ export async function clarifyPricing(
   }
 
   const llm = buildLlmClient(db, options?.llmMode);
-  let eventCursor = await getLatestEventId(db, rfpId);
+  const eventCursor = await getLatestEventId(db, rfpId);
 
   const result = await sendPricingClarificationAndResolve({
     db,
@@ -1462,7 +1462,7 @@ export async function clarifyPricing(
     flaggedLanes,
     styleVariant: rfpId % 3,
   });
-  eventCursor = await publishUnseenEventsAfter(db, rfpId, eventCursor);
+  await publishUnseenEventsAfter(db, rfpId, eventCursor);
 
   await emitAgentEvent(db, {
     rfpId,
@@ -1722,7 +1722,7 @@ export async function draftQuote(
   });
 
   const llm = buildLlmClient(db, options?.llmMode);
-  let eventCursor = await getLatestEventId(db, rfpId);
+  const eventCursor = await getLatestEventId(db, rfpId);
 
   const draft = await draftCustomerQuote({
     db,
@@ -1733,7 +1733,7 @@ export async function draftQuote(
     lanes: quoteInputs,
     llm,
   });
-  eventCursor = await publishUnseenEventsAfter(db, rfpId, eventCursor);
+  await publishUnseenEventsAfter(db, rfpId, eventCursor);
 
   await setRfpState(
     db,
@@ -1833,7 +1833,7 @@ export async function approveAndSendQuote(
       ),
     );
 
-  let eventCursor = await getLatestEventId(db, rfpId);
+  const eventCursor = await getLatestEventId(db, rfpId);
 
   try {
     await approveCustomerQuote({
@@ -1863,7 +1863,7 @@ export async function approveAndSendQuote(
     throw error;
   }
 
-  eventCursor = await publishUnseenEventsAfter(db, rfpId, eventCursor);
+  await publishUnseenEventsAfter(db, rfpId, eventCursor);
 
   await setRfpState(
     db,
@@ -1967,7 +1967,7 @@ export async function processCustomerReply(
     emailSubject: replySubject,
     llm,
   });
-  eventCursor = await publishUnseenEventsAfter(db, rfpId, eventCursor);
+  await publishUnseenEventsAfter(db, rfpId, eventCursor);
 
   let finalState: RfpState;
   if (dealRes.intent === "ACCEPT_ALL" || dealRes.intent === "ACCEPT_PARTIAL") {

@@ -60,9 +60,10 @@ describe("lane assessment 100/100 parity with scripts/analyze-data.py", () => {
 
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "rfp-parity-"));
     const jsonPath = path.join(tmpDir, "report.json");
+    const pythonBin = process.platform === "win32" ? "python" : "python3";
     try {
       execFileSync(
-        "python",
+        pythonBin,
         [ANALYZE_SCRIPT_PATH, WORKBOOK_PATH, "--json", jsonPath],
         { stdio: "pipe" },
       );

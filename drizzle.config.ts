@@ -1,4 +1,4 @@
-export default {
+const drizzleConfig = {
   schema: "./src/db/schema.ts",
   out: "./drizzle",
   dialect: "sqlite",
@@ -6,3 +6,5 @@ export default {
     url: process.env.DATABASE_URL ?? "file:./data/rfp.db",
   },
 };
+
+export default drizzleConfig;
