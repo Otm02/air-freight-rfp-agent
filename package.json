@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test \"tests/**/*.test.ts\"",
     "export-assessments": "tsx scripts/export-assessments.ts",
@@ -18,11 +21,20 @@
     "ai": "^4.3.16",
     "drizzle-orm": "^0.41.0",
     "jszip": "^3.10.1",
+    "lucide-react": "^0.511.0",
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "saxes": "^6.0.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^4.3.5",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

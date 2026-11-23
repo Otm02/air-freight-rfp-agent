@@ -13,7 +13,22 @@ export type AppDatabase = LibSQLDatabase<typeof schema>;
 export interface DatabaseHandle {
   db: AppDatabase;
   client: Client;
+  url: string;
   close: () => void;
+}
+
+const globalForDb = globalThis as typeof globalThis & {
+  __airFreightRfpDb?: Promise<DatabaseHandle>;
+};
+
+export function resolveDefaultDatabaseUrl(): string {
+  const configured = process.env.DATABASE_URL?.trim();
+  const isUnc = process.cwd().startsWith("\\\\");
+  if (isUnc && process.env.FORCE_FILE_DB !== "1") {
+    // Windows libsql hits SQLITE_BUSY file-locking errors over WSL 9p UNC mounts.
+    return ":memory:";
+  }
+  return configured || "file:./data/rfp.db";
 }
 
 function ensureLocalDbParentDir(url: string): void {
@@ -29,7 +44,7 @@ function ensureLocalDbParentDir(url: string): void {
 }
 
 export async function createDatabase(
-  url: string = process.env.DATABASE_URL ?? "file:./data/rfp.db",
+  url: string = resolveDefaultDatabaseUrl(),
 ): Promise<DatabaseHandle> {
   ensureLocalDbParentDir(url);
   const client = createClient({ url });
@@ -50,15 +65,14 @@ export async function createDatabase(
   return {
     db,
     client,
+    url,
     close: () => client.close(),
   };
 }
 
-let defaultDbPromise: Promise<DatabaseHandle> | null = null;
-
 export function getDefaultDatabase(): Promise<DatabaseHandle> {
-  if (!defaultDbPromise) {
-    defaultDbPromise = createDatabase();
+  if (!globalForDb.__airFreightRfpDb) {
+    globalForDb.__airFreightRfpDb = createDatabase(resolveDefaultDatabaseUrl());
   }
-  return defaultDbPromise;
+  return globalForDb.__airFreightRfpDb;
 }

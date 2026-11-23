@@ -471,6 +471,83 @@ export async function loadDatasetFromBuffer(
   return parseDatasetRows(rfpRows, transitRows);
 }
 
+export async function loadRfpBufferWithFallbackFlights(
+  buffer: Buffer | ArrayBuffer | Uint8Array,
+  fallbackFlights: readonly Flight[],
+): Promise<LoadedDataset> {
+  let sheets: Map<string, ParsedWorksheet>;
+  try {
+    sheets = await readXlsxWorkbook(buffer);
+  } catch (error) {
+    return {
+      lanes: [],
+      flights: [],
+      airports: [],
+      issues: [
+        {
+          sheet: "Workbook",
+          rowNumber: null,
+          field: "file",
+          severity: "ERROR",
+          message: `Failed to parse Excel workbook: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+    };
+  }
+
+  const rfpSheet =
+    findSheet(sheets, "Shipper RFP") ?? Array.from(sheets.values())[0];
+  const transitSheet = findSheet(sheets, "Transit Table");
+
+  if (!rfpSheet) {
+    return {
+      lanes: [],
+      flights: [],
+      airports: [],
+      issues: [
+        {
+          sheet: "Workbook",
+          rowNumber: null,
+          field: "sheet",
+          severity: "ERROR",
+          message: 'Required worksheet "Shipper RFP" not found.',
+        },
+      ],
+    };
+  }
+
+  const rfpRows: RawRfpRow[] = rfpSheet.rows
+    .filter((row) => row.rowNumber > 1)
+    .map((row) => ({
+      rowNumber: row.rowNumber,
+      origin: row.cells[0],
+      destination: row.cells[1],
+      tons: row.cells[2],
+      maxTransitDays: row.cells[3],
+      rawEmail: row.cells[4],
+    }));
+
+  const transitRows: RawTransitRow[] = transitSheet
+    ? transitSheet.rows
+        .filter((row) => row.rowNumber > 1)
+        .map((row) => ({
+          rowNumber: row.rowNumber,
+          origin: row.cells[0],
+          destination: row.cells[1],
+          transitDays: row.cells[2],
+          availableServices: row.cells[3],
+        }))
+    : fallbackFlights.map((flight, index) => ({
+        rowNumber: index + 2,
+        origin: flight.origin,
+        destination: flight.destination,
+        transitDays: flight.transitDays,
+        availableServices: flight.availableServices.join(", "),
+      }));
+
+  return parseDatasetRows(rfpRows, transitRows);
+}
+
 export async function loadDatasetFromFile(
   filePath: string,
 ): Promise<LoadedDataset> {
