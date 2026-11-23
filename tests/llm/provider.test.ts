@@ -247,4 +247,112 @@ describe("LlmClient structured output, retry, timeout, and agent_events logging"
     assert.equal(events.length, 1);
     assert.equal(events[0]?.eventType, "LLM_CALL_ERROR");
   });
+
+  it("enforces live LLM_MAX_RPM sliding rate limit without dropping offline mode", async () => {
+    const handle = await createDatabase(":memory:");
+    handles.push(handle);
+
+    let transportCalls = 0;
+    const transport: StructuredTransport = {
+      async generateStructured() {
+        transportCalls += 1;
+        return {
+          rawObject: { services: ["FRAGILE"], confidence: 0.96 },
+          usage: { inputTokens: 20, outputTokens: 10, totalTokens: 30 },
+        };
+      },
+    };
+
+    const client = new LlmClient({
+      provider: "gemini",
+      env: { GEMINI_API_KEY: "test-key", LLM_MAX_RPM: "2" },
+      transport,
+      db: handle.db,
+    });
+
+    const r1 = await client.generateStructured({
+      agentName: "IntakeAgent",
+      operation: "rate_test_1",
+      schema: TestSchema,
+      system: "Extract",
+      prompt: "1",
+      offlineHandler: () => ({ services: [], confidence: 0 }),
+    });
+    const r2 = await client.generateStructured({
+      agentName: "IntakeAgent",
+      operation: "rate_test_2",
+      schema: TestSchema,
+      system: "Extract",
+      prompt: "2",
+      offlineHandler: () => ({ services: [], confidence: 0 }),
+    });
+    const r3 = await client.generateStructured({
+      agentName: "IntakeAgent",
+      operation: "rate_test_3",
+      schema: TestSchema,
+      system: "Extract",
+      prompt: "3",
+      offlineHandler: () => ({ services: [], confidence: 0 }),
+    });
+
+    assert.equal(r1.ok, true);
+    assert.equal(r2.ok, true);
+    assert.equal(r3.ok, false);
+    if (!r3.ok) {
+      assert.equal(r3.errorKind, "RATE_LIMIT_EXCEEDED");
+    }
+    assert.equal(transportCalls, 2);
+    assert.equal(client.getRunStats().callCount, 2);
+    assert.equal(client.getRunStats().maxRequestsPerMinute, 2);
+  });
+
+  it("enforces live LLM_MAX_COST_USD_PER_RUN cumulative spend cap", async () => {
+    const handle = await createDatabase(":memory:");
+    handles.push(handle);
+
+    let transportCalls = 0;
+    const transport: StructuredTransport = {
+      async generateStructured() {
+        transportCalls += 1;
+        return {
+          rawObject: { services: ["OVERSIZED"], confidence: 0.95 },
+          // gpt-4o-mini costs enough with large tokens to exceed a $0.001 cap cleanly
+          usage: { inputTokens: 10_000, outputTokens: 5_000, totalTokens: 15_000 },
+        };
+      },
+    };
+
+    const client = new LlmClient({
+      provider: "openai",
+      env: { OPENAI_API_KEY: "test-key" },
+      maxCostUsdPerRun: 0.001,
+      transport,
+      db: handle.db,
+    });
+
+    const first = await client.generateStructured({
+      agentName: "PricingAgent",
+      operation: "cost_test_1",
+      schema: TestSchema,
+      system: "Extract",
+      prompt: "1",
+      offlineHandler: () => ({ services: [], confidence: 0 }),
+    });
+    const second = await client.generateStructured({
+      agentName: "PricingAgent",
+      operation: "cost_test_2",
+      schema: TestSchema,
+      system: "Extract",
+      prompt: "2",
+      offlineHandler: () => ({ services: [], confidence: 0 }),
+    });
+
+    assert.equal(first.ok, true);
+    assert.equal(second.ok, false);
+    if (!second.ok) {
+      assert.equal(second.errorKind, "COST_CAP_EXCEEDED");
+    }
+    assert.equal(transportCalls, 1);
+    assert.ok(client.getRunStats().cumulativeCostUsd > 0.001);
+  });
 });

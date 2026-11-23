@@ -14,7 +14,9 @@ export type LlmErrorKind =
   | "INVALID_JSON"
   | "SCHEMA_VALIDATION"
   | "TIMEOUT"
-  | "PROVIDER_ERROR";
+  | "PROVIDER_ERROR"
+  | "RATE_LIMIT_EXCEEDED"
+  | "COST_CAP_EXCEEDED";
 
 export interface ProviderConfig {
   provider: LlmProviderName;
@@ -83,11 +85,21 @@ export type StructuredCallResult<T> =
   | StructuredCallSuccess<T>
   | StructuredCallFailure;
 
+export interface LlmRunStats {
+  callCount: number;
+  recentWindowCount: number;
+  cumulativeCostUsd: number;
+  maxRequestsPerMinute: number;
+  maxCostUsdPerRun: number;
+}
+
 export interface LlmClientOptions {
   provider?: LlmProviderPreference;
   model?: string;
   env?: Record<string, string | undefined>;
   db?: AppDatabase;
   defaultTimeoutMs?: number;
+  maxRequestsPerMinute?: number;
+  maxCostUsdPerRun?: number;
   transport?: StructuredTransport;
 }

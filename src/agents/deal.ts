@@ -84,7 +84,7 @@ export interface HandleCustomerReplyResult {
   } | null;
 }
 
-const DEAL_PARSE_SYSTEM_PROMPT = `You are a commercial air freight Deal Desk analyst reading a customer's reply to a formal RFP quote email.
+const DEAL_PARSE_SYSTEM_PROMPT = `You are a commercial air freight Deal Desk analyst reading a customer's reply to a formal RFP quote email. The reply may be in English or French (especially for Montreal/Quebec or France lanes).
 
 Instructions:
 - Classify intent as EXACTLY one of:
@@ -92,7 +92,8 @@ Instructions:
   - ACCEPT_PARTIAL: customer clearly accepts a specific subset of quoted lane codes (e.g., "MEX-CDG", "GRU-BOG") and excludes or declines the rest.
   - REJECT: customer declines/rejects the entire proposal.
   - QUESTION: customer asks questions or requests clarifications before deciding (no binding acceptance yet).
-  - UNCLEAR: tentative, hedged, non-committal ("maybe", "tentatively", "pending legal", "circle back"), or contradictory reply.
+  - UNCLEAR: tentative, hedged, non-committal ("maybe", "tentatively", "pending legal", "circle back", or French equivalents like "sous réserve"), or contradictory reply.
+- If the reply is in French and contains any ambiguity, condition, or partial scope, classify as UNCLEAR or QUESTION and keep confidence below 0.80 so a human reviewer verifies.
 - Return uppercase lane codes (e.g. "MEX-CDG") in acceptedLaneCodes and rejectedLaneCodes matching the quoted lanes.
 - Copy evidenceQuote verbatim as a substring from the customer email.
 - Lower confidence below 0.80 whenever there is ambiguity, hedging, or mixed signals.`;
@@ -168,11 +169,36 @@ function extractClauseSplitLanes(
   return { accepted, rejected };
 }
 
+const FRENCH_CUE_REGEX =
+  /\b(?:bonjour|bonsoir|merci(?:\s+beaucoup|\s+pour|\s+d'avance)?|cordialement|bien\s+[àa]\s+vous|nous\s+(?:acceptons|n'acceptons|refusons|d[ée]clinons|souhaitons|avons|voudrions)|vous\s+(?:pouvez|pourriez|remercions)|pourriez-vous|veuillez|s'il\s+vous\s+pla[îi]t|d'accord|sous\s+r[ée]serve|tarif|devis|d[ée]lai|liaisons?|marchandise)\b/i;
+const FRENCH_ACCENT_REGEX = /[àéèêëîïôùûüçœæ]/i;
+const FRENCH_FUNCTION_WORD_REGEX =
+  /\b(?:nous|vous|le|la|les|des|pour|avec|dans|sur|est|sont|pas)\b/i;
+
+function isLikelyFrenchText(text: string): boolean {
+  if (FRENCH_CUE_REGEX.test(text)) {
+    return true;
+  }
+  return FRENCH_ACCENT_REGEX.test(text) && FRENCH_FUNCTION_WORD_REGEX.test(text);
+}
+
 export function parseCustomerReplyDeterministic(
   emailBody: string,
   quotedLaneCodes: readonly string[],
 ): CustomerReplyParseOutput {
   const trimmed = emailBody.trim();
+  if (trimmed.length === 0) {
+    return {
+      intent: "UNCLEAR",
+      acceptedLaneCodes: [],
+      rejectedLaneCodes: [],
+      questions: [],
+      evidenceQuote: "",
+      confidence: 0.2,
+      summary: "Customer reply body was empty; escalated for human review.",
+    };
+  }
+
   const quotedUpper = quotedLaneCodes.map((c) => c.toUpperCase());
   const firstSentence =
     trimmed
@@ -183,6 +209,19 @@ export function parseCustomerReplyDeterministic(
           l.length > 10 &&
           !/^(?:hi|hello|dear|thanks|thank you|best|regards|sincerely)/i.test(l),
       ) ?? trimmed.slice(0, 120);
+
+  if (isLikelyFrenchText(trimmed)) {
+    return {
+      intent: "UNCLEAR",
+      acceptedLaneCodes: [],
+      rejectedLaneCodes: [],
+      questions: extractSentencesWithQuestions(trimmed),
+      evidenceQuote: firstSentence,
+      confidence: 0.4,
+      summary:
+        "French-language customer reply detected in offline mode; escalated for bilingual human review instead of guessing.",
+    };
+  }
 
   const hasUnclearCues =
     /\b(?:tentative|tentatively|maybe|not sure|circle back|pending legal|pending board|internal sign-?off|under review|cannot confirm yet)\b/i.test(

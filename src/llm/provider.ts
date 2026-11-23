@@ -15,6 +15,7 @@ import type {
   LlmClientOptions,
   LlmErrorKind,
   LlmProviderName,
+  LlmRunStats,
   LlmUsage,
   ProviderConfig,
   StructuredCallRequest,
@@ -28,7 +29,21 @@ const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 const DEFAULT_OFFLINE_MODEL = "offline-rule-v1";
 const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_MAX_RPM = 30;
+const DEFAULT_MAX_COST_USD_PER_RUN = 0.5;
+const RPM_WINDOW_MS = 60_000;
 const RATE_LIMIT_DELAYS_MS = [2_000, 4_000, 8_000, 16_000] as const;
+
+function parsePositiveLimit(raw: string | undefined, fallback: number): number {
+  if (!raw || raw.trim().length === 0) {
+    return fallback;
+  }
+  const parsed = Number(raw.trim());
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+}
 
 function sanitizeUsage(raw?: Partial<LlmUsage>): LlmUsage {
   const inputTokens = Math.max(0, Math.round(raw?.inputTokens ?? 0));
@@ -237,17 +252,55 @@ export class LlmClient {
   readonly config: ProviderConfig;
   private readonly db?: AppDatabase;
   private readonly defaultTimeoutMs: number;
+  private readonly maxRequestsPerMinute: number;
+  private readonly maxCostUsdPerRun: number;
   private readonly transport?: StructuredTransport;
+  private readonly callTimestampsMs: number[] = [];
+  private liveCallCount = 0;
+  private cumulativeCostUsd = 0;
 
   constructor(options?: LlmClientOptions) {
+    const env = options?.env ?? process.env;
     this.config = resolveProviderConfig(options);
     this.db = options?.db;
     this.defaultTimeoutMs = options?.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.maxRequestsPerMinute =
+      options?.maxRequestsPerMinute !== undefined &&
+      Number.isFinite(options.maxRequestsPerMinute) &&
+      options.maxRequestsPerMinute > 0
+        ? Math.max(1, Math.floor(options.maxRequestsPerMinute))
+        : Math.max(1, Math.floor(parsePositiveLimit(env.LLM_MAX_RPM, DEFAULT_MAX_RPM)));
+    this.maxCostUsdPerRun =
+      options?.maxCostUsdPerRun !== undefined &&
+      Number.isFinite(options.maxCostUsdPerRun) &&
+      options.maxCostUsdPerRun > 0
+        ? options.maxCostUsdPerRun
+        : parsePositiveLimit(env.LLM_MAX_COST_USD_PER_RUN, DEFAULT_MAX_COST_USD_PER_RUN);
     if (options?.transport) {
       this.transport = options.transport;
     } else if (this.config.provider !== "offline" && this.config.apiKey) {
       this.transport = createVercelAiTransport(this.config.apiKey);
     }
+  }
+
+  private pruneCallWindow(nowMs: number): void {
+    while (
+      this.callTimestampsMs.length > 0 &&
+      nowMs - this.callTimestampsMs[0]! >= RPM_WINDOW_MS
+    ) {
+      this.callTimestampsMs.shift();
+    }
+  }
+
+  getRunStats(): LlmRunStats {
+    this.pruneCallWindow(Date.now());
+    return {
+      callCount: this.liveCallCount,
+      recentWindowCount: this.callTimestampsMs.length,
+      cumulativeCostUsd: Number(this.cumulativeCostUsd.toFixed(6)),
+      maxRequestsPerMinute: this.maxRequestsPerMinute,
+      maxCostUsdPerRun: this.maxCostUsdPerRun,
+    };
   }
 
   get provider(): LlmProviderName {
@@ -429,6 +482,87 @@ export class LlmClient {
       );
     }
 
+    const zeroUsage: LlmUsage = {
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+    };
+
+    if (this.cumulativeCostUsd >= this.maxCostUsdPerRun) {
+      const errorMessage = `Live LLM per-run cost cap exceeded ($${this.cumulativeCostUsd.toFixed(6)} >= $${this.maxCostUsdPerRun.toFixed(2)}).`;
+      await this.logAgentEvent({
+        rfpId: request.rfpId,
+        laneId: request.laneId,
+        agentName: request.agentName,
+        eventType: "LLM_CALL_ERROR",
+        latencyMs: 0,
+        usage: zeroUsage,
+        costUsd: 0,
+        retryCount: 0,
+        status: "ERROR",
+        summary: `${request.operation} blocked by per-run cost cap`,
+        payload: {
+          operation: request.operation,
+          errorKind: "COST_CAP_EXCEEDED",
+          errorMessage,
+          cumulativeCostUsd: this.cumulativeCostUsd,
+          maxCostUsdPerRun: this.maxCostUsdPerRun,
+          ...request.metadata,
+        },
+      });
+      return {
+        ok: false,
+        errorKind: "COST_CAP_EXCEEDED",
+        errorMessage,
+        provider: this.config.provider,
+        model: this.config.model,
+        latencyMs: 0,
+        usage: zeroUsage,
+        costUsd: 0,
+        retriesUsed: 0,
+      };
+    }
+
+    const nowMs = Date.now();
+    this.pruneCallWindow(nowMs);
+    if (this.callTimestampsMs.length >= this.maxRequestsPerMinute) {
+      const errorMessage = `Live LLM rate limit exceeded (${this.callTimestampsMs.length}/${this.maxRequestsPerMinute} requests in last 60s).`;
+      await this.logAgentEvent({
+        rfpId: request.rfpId,
+        laneId: request.laneId,
+        agentName: request.agentName,
+        eventType: "LLM_CALL_ERROR",
+        latencyMs: 0,
+        usage: zeroUsage,
+        costUsd: 0,
+        retryCount: 0,
+        status: "ERROR",
+        summary: `${request.operation} blocked by LLM_MAX_RPM limit`,
+        payload: {
+          operation: request.operation,
+          errorKind: "RATE_LIMIT_EXCEEDED",
+          errorMessage,
+          recentWindowCount: this.callTimestampsMs.length,
+          maxRequestsPerMinute: this.maxRequestsPerMinute,
+          ...request.metadata,
+        },
+      });
+      return {
+        ok: false,
+        errorKind: "RATE_LIMIT_EXCEEDED",
+        errorMessage,
+        provider: this.config.provider,
+        model: this.config.model,
+        latencyMs: 0,
+        usage: zeroUsage,
+        costUsd: 0,
+        retriesUsed: 0,
+      };
+    }
+
+    this.callTimestampsMs.push(nowMs);
+    this.liveCallCount += 1;
+
     const timeoutMs = request.timeoutMs ?? this.defaultTimeoutMs;
     let totalUsage: LlmUsage = {
       inputTokens: 0,
@@ -484,6 +618,7 @@ export class LlmClient {
               totalUsage.inputTokens,
               totalUsage.outputTokens,
             );
+            this.cumulativeCostUsd += totalCost;
 
             await this.logAgentEvent({
               rfpId: request.rfpId,
@@ -570,6 +705,7 @@ export class LlmClient {
         totalUsage.inputTokens,
         totalUsage.outputTokens,
       );
+      this.cumulativeCostUsd += totalCost;
       const finalKind = attemptErrorKind ?? "PROVIDER_ERROR";
       await this.logAgentEvent({
         rfpId: request.rfpId,
