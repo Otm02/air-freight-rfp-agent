@@ -1,0 +1,1314 @@
+[
+  {
+    "laneNumber": 1,
+    "laneCode": "FAI-SIN",
+    "origin": "FAI",
+    "destination": "SIN",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo is fine; no special services needed"
+    }
+  },
+  {
+    "laneNumber": 2,
+    "laneCode": "MEX-CDG",
+    "origin": "MEX",
+    "destination": "CDG",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg"
+    }
+  },
+  {
+    "laneNumber": 3,
+    "laneCode": "DFW-MEX",
+    "origin": "DFW",
+    "destination": "MEX",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights"
+    }
+  },
+  {
+    "laneNumber": 4,
+    "laneCode": "GRU-SIN",
+    "origin": "GRU",
+    "destination": "SIN",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 5,
+    "laneCode": "FRA-MEX",
+    "origin": "FRA",
+    "destination": "MEX",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg",
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 6,
+    "laneCode": "HKG-LAX",
+    "origin": "HKG",
+    "destination": "LAX",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain"
+    }
+  },
+  {
+    "laneNumber": 7,
+    "laneCode": "NRT-GRU",
+    "origin": "NRT",
+    "destination": "GRU",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling"
+    }
+  },
+  {
+    "laneNumber": 8,
+    "laneCode": "BOG-ATL",
+    "origin": "BOG",
+    "destination": "ATL",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "nothing special is needed for this shipment, just standard general cargo"
+    }
+  },
+  {
+    "laneNumber": 9,
+    "laneCode": "GRU-BOG",
+    "origin": "GRU",
+    "destination": "BOG",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain",
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 10,
+    "laneCode": "DXB-MIA",
+    "origin": "DXB",
+    "destination": "MIA",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 11,
+    "laneCode": "GRU-FAI",
+    "origin": "GRU",
+    "destination": "FAI",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections"
+    }
+  },
+  {
+    "laneNumber": 12,
+    "laneCode": "JFK-LAX",
+    "origin": "JFK",
+    "destination": "LAX",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling"
+    }
+  },
+  {
+    "laneNumber": 13,
+    "laneCode": "DXB-GRU",
+    "origin": "DXB",
+    "destination": "GRU",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security throughout",
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 14,
+    "laneCode": "LHR-YYZ",
+    "origin": "LHR",
+    "destination": "YYZ",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 15,
+    "laneCode": "ORD-DXB",
+    "origin": "ORD",
+    "destination": "DXB",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo with no additional services"
+    }
+  },
+  {
+    "laneNumber": 16,
+    "laneCode": "JFK-ATL",
+    "origin": "JFK",
+    "destination": "ATL",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip"
+    }
+  },
+  {
+    "laneNumber": 17,
+    "laneCode": "ORD-AMS",
+    "origin": "ORD",
+    "destination": "AMS",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg",
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 18,
+    "laneCode": "CDG-LAX",
+    "origin": "CDG",
+    "destination": "LAX",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights"
+    }
+  },
+  {
+    "laneNumber": 19,
+    "laneCode": "MEX-BOG",
+    "origin": "MEX",
+    "destination": "BOG",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 20,
+    "laneCode": "JFK-HKG",
+    "origin": "JFK",
+    "destination": "HKG",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 21,
+    "laneCode": "NRT-SIN",
+    "origin": "NRT",
+    "destination": "SIN",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain",
+      "HIGH_VALUE_SECURITY": "high-value security throughout"
+    }
+  },
+  {
+    "laneNumber": 22,
+    "laneCode": "LHR-MEX",
+    "origin": "LHR",
+    "destination": "MEX",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "Standard general cargo is fine; no special services needed"
+    }
+  },
+  {
+    "laneNumber": 23,
+    "laneCode": "MIA-ORD",
+    "origin": "MIA",
+    "destination": "ORD",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 24,
+    "laneCode": "JFK-DXB",
+    "origin": "JFK",
+    "destination": "DXB",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 25,
+    "laneCode": "LAX-GRU",
+    "origin": "LAX",
+    "destination": "GRU",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling",
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 26,
+    "laneCode": "AMS-ATL",
+    "origin": "AMS",
+    "destination": "ATL",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections"
+    }
+  },
+  {
+    "laneNumber": 27,
+    "laneCode": "HKG-SIN",
+    "origin": "HKG",
+    "destination": "SIN",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling"
+    }
+  },
+  {
+    "laneNumber": 28,
+    "laneCode": "YYZ-DXB",
+    "origin": "YYZ",
+    "destination": "DXB",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security throughout"
+    }
+  },
+  {
+    "laneNumber": 29,
+    "laneCode": "DFW-SIN",
+    "origin": "DFW",
+    "destination": "SIN",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "nothing special is needed for this shipment, just standard general cargo"
+    }
+  },
+  {
+    "laneNumber": 30,
+    "laneCode": "ORD-MEX",
+    "origin": "ORD",
+    "destination": "MEX",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 31,
+    "laneCode": "SIN-GRU",
+    "origin": "SIN",
+    "destination": "GRU",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip"
+    }
+  },
+  {
+    "laneNumber": 32,
+    "laneCode": "DFW-NRT",
+    "origin": "DFW",
+    "destination": "NRT",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg"
+    }
+  },
+  {
+    "laneNumber": 33,
+    "laneCode": "ATL-MEX",
+    "origin": "ATL",
+    "destination": "MEX",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights",
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 34,
+    "laneCode": "ANC-LHR",
+    "origin": "ANC",
+    "destination": "LHR",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 35,
+    "laneCode": "JFK-ANC",
+    "origin": "JFK",
+    "destination": "ANC",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 36,
+    "laneCode": "ATL-DXB",
+    "origin": "ATL",
+    "destination": "DXB",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo with no additional services"
+    }
+  },
+  {
+    "laneNumber": 37,
+    "laneCode": "ORD-MIA",
+    "origin": "ORD",
+    "destination": "MIA",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling",
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 38,
+    "laneCode": "NRT-LHR",
+    "origin": "NRT",
+    "destination": "LHR",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 39,
+    "laneCode": "BOG-DXB",
+    "origin": "BOG",
+    "destination": "DXB",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 40,
+    "laneCode": "MEX-YYZ",
+    "origin": "MEX",
+    "destination": "YYZ",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 41,
+    "laneCode": "FRA-YYZ",
+    "origin": "FRA",
+    "destination": "YYZ",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections",
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights"
+    }
+  },
+  {
+    "laneNumber": 42,
+    "laneCode": "GRU-CDG",
+    "origin": "GRU",
+    "destination": "CDG",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling"
+    }
+  },
+  {
+    "laneNumber": 43,
+    "laneCode": "SIN-HKG",
+    "origin": "SIN",
+    "destination": "HKG",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo is fine; no special services needed"
+    }
+  },
+  {
+    "laneNumber": 44,
+    "laneCode": "FRA-ATL",
+    "origin": "FRA",
+    "destination": "ATL",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 45,
+    "laneCode": "DFW-JFK",
+    "origin": "DFW",
+    "destination": "JFK",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling",
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 46,
+    "laneCode": "ATL-GRU",
+    "origin": "ATL",
+    "destination": "GRU",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip"
+    }
+  },
+  {
+    "laneNumber": 47,
+    "laneCode": "LHR-DFW",
+    "origin": "LHR",
+    "destination": "DFW",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg"
+    }
+  },
+  {
+    "laneNumber": 48,
+    "laneCode": "MEX-ATL",
+    "origin": "MEX",
+    "destination": "ATL",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights"
+    }
+  },
+  {
+    "laneNumber": 49,
+    "laneCode": "HKG-MIA",
+    "origin": "HKG",
+    "destination": "MIA",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip",
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 50,
+    "laneCode": "YYZ-BOG",
+    "origin": "YYZ",
+    "destination": "BOG",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "nothing special is needed for this shipment, just standard general cargo"
+    }
+  },
+  {
+    "laneNumber": 51,
+    "laneCode": "LHR-JFK",
+    "origin": "LHR",
+    "destination": "JFK",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain"
+    }
+  },
+  {
+    "laneNumber": 52,
+    "laneCode": "FRA-ORD",
+    "origin": "FRA",
+    "destination": "ORD",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling"
+    }
+  },
+  {
+    "laneNumber": 53,
+    "laneCode": "LHR-FRA",
+    "origin": "LHR",
+    "destination": "FRA",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way",
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 54,
+    "laneCode": "DFW-LAX",
+    "origin": "DFW",
+    "destination": "LAX",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 55,
+    "laneCode": "YYZ-NRT",
+    "origin": "YYZ",
+    "destination": "NRT",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 56,
+    "laneCode": "AMS-NRT",
+    "origin": "AMS",
+    "destination": "NRT",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections"
+    }
+  },
+  {
+    "laneNumber": 57,
+    "laneCode": "YYZ-MIA",
+    "origin": "YYZ",
+    "destination": "MIA",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo with no additional services"
+    }
+  },
+  {
+    "laneNumber": 58,
+    "laneCode": "FRA-HKG",
+    "origin": "FRA",
+    "destination": "HKG",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security throughout"
+    }
+  },
+  {
+    "laneNumber": 59,
+    "laneCode": "CDG-DXB",
+    "origin": "CDG",
+    "destination": "DXB",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 60,
+    "laneCode": "ATL-JFK",
+    "origin": "ATL",
+    "destination": "JFK",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 61,
+    "laneCode": "DXB-HKG",
+    "origin": "DXB",
+    "destination": "HKG",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip",
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 62,
+    "laneCode": "MIA-GRU",
+    "origin": "MIA",
+    "destination": "GRU",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg"
+    }
+  },
+  {
+    "laneNumber": 63,
+    "laneCode": "DFW-LHR",
+    "origin": "DFW",
+    "destination": "LHR",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights"
+    }
+  },
+  {
+    "laneNumber": 64,
+    "laneCode": "ORD-LAX",
+    "origin": "ORD",
+    "destination": "LAX",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo is fine; no special services needed"
+    }
+  },
+  {
+    "laneNumber": 65,
+    "laneCode": "DXB-BOG",
+    "origin": "DXB",
+    "destination": "BOG",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg",
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 66,
+    "laneCode": "ATL-HKG",
+    "origin": "ATL",
+    "destination": "HKG",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain"
+    }
+  },
+  {
+    "laneNumber": 67,
+    "laneCode": "SIN-DFW",
+    "origin": "SIN",
+    "destination": "DFW",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling"
+    }
+  },
+  {
+    "laneNumber": 68,
+    "laneCode": "MEX-ORD",
+    "origin": "MEX",
+    "destination": "ORD",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 69,
+    "laneCode": "LHR-BOG",
+    "origin": "LHR",
+    "destination": "BOG",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain",
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 70,
+    "laneCode": "YYZ-GRU",
+    "origin": "YYZ",
+    "destination": "GRU",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 71,
+    "laneCode": "MIA-MEX",
+    "origin": "MIA",
+    "destination": "MEX",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "nothing special is needed for this shipment, just standard general cargo"
+    }
+  },
+  {
+    "laneNumber": 72,
+    "laneCode": "NRT-LAX",
+    "origin": "NRT",
+    "destination": "LAX",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling"
+    }
+  },
+  {
+    "laneNumber": 73,
+    "laneCode": "BOG-CDG",
+    "origin": "BOG",
+    "destination": "CDG",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security throughout",
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 74,
+    "laneCode": "HKG-JFK",
+    "origin": "HKG",
+    "destination": "JFK",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 75,
+    "laneCode": "LAX-LHR",
+    "origin": "LAX",
+    "destination": "LHR",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 76,
+    "laneCode": "GRU-MEX",
+    "origin": "GRU",
+    "destination": "MEX",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip"
+    }
+  },
+  {
+    "laneNumber": 77,
+    "laneCode": "DXB-YYZ",
+    "origin": "DXB",
+    "destination": "YYZ",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "dangerous-goods handling on every leg",
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 78,
+    "laneCode": "CDG-ORD",
+    "origin": "CDG",
+    "destination": "ORD",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo with no additional services"
+    }
+  },
+  {
+    "laneNumber": 79,
+    "laneCode": "HKG-ORD",
+    "origin": "HKG",
+    "destination": "ORD",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 80,
+    "laneCode": "ORD-YYZ",
+    "origin": "ORD",
+    "destination": "YYZ",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 81,
+    "laneCode": "GRU-FRA",
+    "origin": "GRU",
+    "destination": "FRA",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain",
+      "HIGH_VALUE_SECURITY": "high-value security throughout"
+    }
+  },
+  {
+    "laneNumber": 82,
+    "laneCode": "LHR-GRU",
+    "origin": "LHR",
+    "destination": "GRU",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling"
+    }
+  },
+  {
+    "laneNumber": 83,
+    "laneCode": "HKG-DXB",
+    "origin": "HKG",
+    "destination": "DXB",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 84,
+    "laneCode": "MIA-FRA",
+    "origin": "MIA",
+    "destination": "FRA",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 85,
+    "laneCode": "MEX-DFW",
+    "origin": "MEX",
+    "destination": "DFW",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo is fine; no special services needed"
+    }
+  },
+  {
+    "laneNumber": 86,
+    "laneCode": "GRU-AMS",
+    "origin": "GRU",
+    "destination": "AMS",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections"
+    }
+  },
+  {
+    "laneNumber": 87,
+    "laneCode": "LHR-DXB",
+    "origin": "LHR",
+    "destination": "DXB",
+    "requestedServices": [
+      "DANGEROUS_GOODS"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "classified as dangerous goods and needs the appropriate handling"
+    }
+  },
+  {
+    "laneNumber": 88,
+    "laneCode": "FRA-AMS",
+    "origin": "FRA",
+    "destination": "AMS",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security throughout"
+    }
+  },
+  {
+    "laneNumber": 89,
+    "laneCode": "NRT-ANC",
+    "origin": "NRT",
+    "destination": "ANC",
+    "requestedServices": [
+      "TEMP_CONTROLLED",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "refrigerated at 2-8 C, including connections",
+      "FRAGILE": "fragile-goods handling throughout"
+    }
+  },
+  {
+    "laneNumber": 90,
+    "laneCode": "DXB-SIN",
+    "origin": "DXB",
+    "destination": "SIN",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "flights that can accommodate oversized cargo"
+    }
+  },
+  {
+    "laneNumber": 91,
+    "laneCode": "LHR-ATL",
+    "origin": "LHR",
+    "destination": "ATL",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "between 2 and 8 degrees C for the whole trip"
+    }
+  },
+  {
+    "laneNumber": 92,
+    "laneCode": "CDG-JFK",
+    "origin": "CDG",
+    "destination": "JFK",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "nothing special is needed for this shipment, just standard general cargo"
+    }
+  },
+  {
+    "laneNumber": 93,
+    "laneCode": "MIA-LAX",
+    "origin": "MIA",
+    "destination": "LAX",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY",
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value security is needed, including on connecting flights",
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  },
+  {
+    "laneNumber": 94,
+    "laneCode": "BOG-MEX",
+    "origin": "BOG",
+    "destination": "MEX",
+    "requestedServices": [
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "FRAGILE": "contents are fragile, so please arrange fragile handling"
+    }
+  },
+  {
+    "laneNumber": 95,
+    "laneCode": "DXB-JFK",
+    "origin": "DXB",
+    "destination": "JFK",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized-cargo handling on all flights"
+    }
+  },
+  {
+    "laneNumber": 96,
+    "laneCode": "YYZ-JFK",
+    "origin": "YYZ",
+    "destination": "JFK",
+    "requestedServices": [
+      "TEMP_CONTROLLED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "TEMP_CONTROLLED": "continuous 2-8 C cold chain"
+    }
+  },
+  {
+    "laneNumber": 97,
+    "laneCode": "CDG-HKG",
+    "origin": "CDG",
+    "destination": "HKG",
+    "requestedServices": [
+      "DANGEROUS_GOODS",
+      "FRAGILE"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "DANGEROUS_GOODS": "approved dangerous-goods handling",
+      "FRAGILE": "fragile on every leg"
+    }
+  },
+  {
+    "laneNumber": 98,
+    "laneCode": "FRA-GRU",
+    "origin": "FRA",
+    "destination": "GRU",
+    "requestedServices": [
+      "HIGH_VALUE_SECURITY"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "HIGH_VALUE_SECURITY": "high-value items, so we need secure handling all the way"
+    }
+  },
+  {
+    "laneNumber": 99,
+    "laneCode": "JFK-YYZ",
+    "origin": "JFK",
+    "destination": "YYZ",
+    "requestedServices": [],
+    "standardCargo": true,
+    "expectedQuotes": {
+      "standardCargo": "standard general cargo with no additional services"
+    }
+  },
+  {
+    "laneNumber": 100,
+    "laneCode": "SIN-JFK",
+    "origin": "SIN",
+    "destination": "JFK",
+    "requestedServices": [
+      "OVERSIZED"
+    ],
+    "standardCargo": false,
+    "expectedQuotes": {
+      "OVERSIZED": "oversized, so please confirm oversized-cargo capability throughout"
+    }
+  }
+]
