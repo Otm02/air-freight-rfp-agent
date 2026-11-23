@@ -96,8 +96,12 @@ export const emails = sqliteTable("emails", {
   recipient: text("recipient").notNull(),
   subject: text("subject").notNull(),
   body: text("body").notNull(),
+  plainTextBody: text("plain_text_body"),
   parsedPayloadJson: text("parsed_payload_json"),
   status: text("status").notNull(),
+  approvedBy: text("approved_by"),
+  approvedAt: text("approved_at"),
+  sentAt: text("sent_at"),
   createdAt: text("created_at").notNull(),
 });
 
@@ -139,6 +143,9 @@ export const proposals = sqliteTable("proposals", {
   totalDeclinedLanes: integer("total_declined_lanes").notNull(),
   totalTons: real("total_tons").notNull(),
   totalValueUsd: real("total_value_usd").notNull(),
+  approvedBy: text("approved_by"),
+  approvedAt: text("approved_at"),
+  sentAt: text("sent_at"),
   acceptedAt: text("accepted_at"),
   createdAt: text("created_at").notNull(),
 });

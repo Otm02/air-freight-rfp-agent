@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import { eq } from "drizzle-orm";
+import { createClient } from "@libsql/client";
 import {
   agentEvents,
   createDatabase,
   emails,
+  ensureDatabaseSchema,
   flights,
   humanTasks,
   laneAssessments,
@@ -132,13 +134,19 @@ describe("Drizzle SQLite 11-table schema & bootstrap", () => {
         recipient: "rfp-team@carrier.example",
         subject: "Re: Pricing Request",
         body: "MEX-CDG recommended at $2,100/ton.",
+        plainTextBody: "MEX-CDG recommended at $2,100/ton.",
         parsedPayloadJson: null,
         status: "RECEIVED",
+        approvedBy: "alice.rfp@carrier.example",
+        approvedAt: now,
+        sentAt: null,
         createdAt: now,
       })
       .returning();
     assert.ok(email);
     assert.equal(email.counterparty, "pricing");
+    assert.equal(email.approvedBy, "alice.rfp@carrier.example");
+    assert.equal(email.plainTextBody, "MEX-CDG recommended at $2,100/ton.");
 
     await db.insert(pricingResponses).values({
       rfpId: rfp.id,
@@ -165,11 +173,17 @@ describe("Drizzle SQLite 11-table schema & bootstrap", () => {
         totalDeclinedLanes: 0,
         totalTons: 12.3,
         totalValueUsd: 25830,
+        approvedBy: "alice.rfp@carrier.example",
+        approvedAt: now,
+        sentAt: now,
         acceptedAt: now,
         createdAt: now,
       })
       .returning();
     assert.ok(proposal);
+    assert.equal(proposal.approvedBy, "alice.rfp@carrier.example");
+    assert.equal(proposal.approvedAt, now);
+    assert.equal(proposal.sentAt, now);
 
     await db.insert(proposalLanes).values({
       proposalId: proposal.id,
@@ -251,5 +265,80 @@ describe("Drizzle SQLite 11-table schema & bootstrap", () => {
     const remainingTasks = await db.select().from(humanTasks);
     assert.equal(remainingLanes.length, 0);
     assert.equal(remainingTasks.length, 0);
+  });
+
+  it("adds new approval and plain-text columns when migrating an older database", async () => {
+    const client = createClient({ url: ":memory:" });
+    try {
+      await client.execute(`
+        CREATE TABLE rfps (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          source_type TEXT NOT NULL,
+          status TEXT NOT NULL,
+          llm_provider TEXT NOT NULL,
+          customer_name TEXT NOT NULL,
+          customer_email TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      await client.execute(`
+        CREATE TABLE emails (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          rfp_id INTEGER NOT NULL REFERENCES rfps(id) ON DELETE CASCADE,
+          thread_type TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          sender TEXT NOT NULL,
+          recipient TEXT NOT NULL,
+          subject TEXT NOT NULL,
+          body TEXT NOT NULL,
+          parsed_payload_json TEXT,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+      `);
+      await client.execute(`
+        CREATE TABLE proposals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          rfp_id INTEGER NOT NULL REFERENCES rfps(id) ON DELETE CASCADE,
+          version INTEGER NOT NULL DEFAULT 1,
+          status TEXT NOT NULL,
+          quote_email_id INTEGER REFERENCES emails(id) ON DELETE SET NULL,
+          customer_reply_email_id INTEGER REFERENCES emails(id) ON DELETE SET NULL,
+          total_quoted_lanes INTEGER NOT NULL,
+          total_declined_lanes INTEGER NOT NULL,
+          total_tons REAL NOT NULL,
+          total_value_usd REAL NOT NULL,
+          accepted_at TEXT,
+          created_at TEXT NOT NULL
+        );
+      `);
+
+      await ensureDatabaseSchema(client);
+
+      const emailInfo = await client.execute("PRAGMA table_info(emails);");
+      const emailCols = new Set(emailInfo.rows.map((r) => String(r.name)));
+      for (const expected of [
+        "counterparty",
+        "plain_text_body",
+        "approved_by",
+        "approved_at",
+        "sent_at",
+      ]) {
+        assert.ok(emailCols.has(expected), `emails missing column ${expected}`);
+      }
+
+      const proposalInfo = await client.execute("PRAGMA table_info(proposals);");
+      const proposalCols = new Set(proposalInfo.rows.map((r) => String(r.name)));
+      for (const expected of ["approved_by", "approved_at", "sent_at"]) {
+        assert.ok(
+          proposalCols.has(expected),
+          `proposals missing column ${expected}`,
+        );
+      }
+    } finally {
+      client.close();
+    }
   });
 });

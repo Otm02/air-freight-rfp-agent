@@ -69,8 +69,12 @@ const SCHEMA_STATEMENTS: readonly string[] = [
     recipient TEXT NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
+    plain_text_body TEXT,
     parsed_payload_json TEXT,
     status TEXT NOT NULL,
+    approved_by TEXT,
+    approved_at TEXT,
+    sent_at TEXT,
     created_at TEXT NOT NULL
   );`,
   `CREATE TABLE IF NOT EXISTS pricing_responses (
@@ -97,6 +101,9 @@ const SCHEMA_STATEMENTS: readonly string[] = [
     total_declined_lanes INTEGER NOT NULL,
     total_tons REAL NOT NULL,
     total_value_usd REAL NOT NULL,
+    approved_by TEXT,
+    approved_at TEXT,
+    sent_at TEXT,
     accepted_at TEXT,
     created_at TEXT NOT NULL
   );`,
@@ -168,17 +175,37 @@ const SCHEMA_STATEMENTS: readonly string[] = [
     ON human_tasks(rfp_id, status);`,
 ];
 
+async function ensureColumnExists(
+  client: Client,
+  table: string,
+  column: string,
+  definitionSql: string,
+): Promise<void> {
+  const info = await client.execute(`PRAGMA table_info(${table});`);
+  const exists = info.rows.some((row) => String(row.name) === column);
+  if (!exists) {
+    await client.execute(
+      `ALTER TABLE ${table} ADD COLUMN ${column} ${definitionSql};`,
+    );
+  }
+}
+
 export async function ensureDatabaseSchema(client: Client): Promise<void> {
   for (const sql of SCHEMA_STATEMENTS) {
     await client.execute(sql);
   }
-  const emailCols = await client.execute("PRAGMA table_info(emails);");
-  const hasCounterparty = emailCols.rows.some(
-    (row) => String(row.name) === "counterparty",
+  await ensureColumnExists(
+    client,
+    "emails",
+    "counterparty",
+    "TEXT NOT NULL DEFAULT 'pricing'",
   );
-  if (!hasCounterparty) {
-    await client.execute(
-      "ALTER TABLE emails ADD COLUMN counterparty TEXT NOT NULL DEFAULT 'pricing';",
-    );
-  }
+  await ensureColumnExists(client, "emails", "plain_text_body", "TEXT");
+  await ensureColumnExists(client, "emails", "approved_by", "TEXT");
+  await ensureColumnExists(client, "emails", "approved_at", "TEXT");
+  await ensureColumnExists(client, "emails", "sent_at", "TEXT");
+
+  await ensureColumnExists(client, "proposals", "approved_by", "TEXT");
+  await ensureColumnExists(client, "proposals", "approved_at", "TEXT");
+  await ensureColumnExists(client, "proposals", "sent_at", "TEXT");
 }
