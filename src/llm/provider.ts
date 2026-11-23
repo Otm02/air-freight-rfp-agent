@@ -9,6 +9,7 @@ import {
 } from "ai";
 import type { z } from "zod";
 import { agentEvents, type AppDatabase } from "../db";
+import { publishAgentEvent } from "../orchestrator/event-bus";
 import { estimateCostUsd } from "./pricing";
 import type {
   LlmClientOptions,
@@ -273,24 +274,36 @@ export class LlmClient {
     if (!this.db) {
       return;
     }
-    await this.db.insert(agentEvents).values({
-      rfpId: params.rfpId ?? null,
-      laneId: params.laneId ?? null,
-      agentName: params.agentName,
-      eventType: params.eventType,
-      provider: this.config.provider,
-      model: this.config.model,
-      latencyMs: Math.max(0, Math.round(params.latencyMs)),
-      inputTokens: params.usage.inputTokens,
-      outputTokens: params.usage.outputTokens,
-      totalTokens: params.usage.totalTokens,
-      costUsd: params.costUsd,
-      retryCount: params.retryCount,
-      status: params.status,
-      summary: params.summary,
-      payloadJson: JSON.stringify(params.payload),
-      createdAt: new Date().toISOString(),
-    });
+    const executionMode =
+      this.config.provider === "offline" ? "DETERMINISTIC" : "LLM";
+    const [inserted] = await this.db
+      .insert(agentEvents)
+      .values({
+        rfpId: params.rfpId ?? null,
+        laneId: params.laneId ?? null,
+        agentName: params.agentName,
+        eventType: params.eventType,
+        provider: this.config.provider,
+        model: this.config.model,
+        latencyMs: Math.max(0, Math.round(params.latencyMs)),
+        inputTokens: params.usage.inputTokens,
+        outputTokens: params.usage.outputTokens,
+        totalTokens: params.usage.totalTokens,
+        costUsd: params.costUsd,
+        retryCount: params.retryCount,
+        status: params.status,
+        summary: params.summary,
+        payloadJson: JSON.stringify({
+          executionMode,
+          step: String(params.payload.operation ?? params.eventType),
+          ...params.payload,
+        }),
+        createdAt: new Date().toISOString(),
+      })
+      .returning();
+    if (inserted) {
+      publishAgentEvent(inserted);
+    }
   }
 
   async generateStructured<TSchema extends z.ZodTypeAny>(
