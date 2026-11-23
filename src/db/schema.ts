@@ -91,6 +91,7 @@ export const emails = sqliteTable("emails", {
     .references(() => rfps.id, { onDelete: "cascade" }),
   threadType: text("thread_type").notNull(),
   direction: text("direction").notNull(),
+  counterparty: text("counterparty").notNull().default("pricing"),
   sender: text("sender").notNull(),
   recipient: text("recipient").notNull(),
   subject: text("subject").notNull(),

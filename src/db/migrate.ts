@@ -64,6 +64,7 @@ const SCHEMA_STATEMENTS: readonly string[] = [
     rfp_id INTEGER NOT NULL REFERENCES rfps(id) ON DELETE CASCADE,
     thread_type TEXT NOT NULL,
     direction TEXT NOT NULL,
+    counterparty TEXT NOT NULL DEFAULT 'pricing',
     sender TEXT NOT NULL,
     recipient TEXT NOT NULL,
     subject TEXT NOT NULL,
@@ -170,5 +171,14 @@ const SCHEMA_STATEMENTS: readonly string[] = [
 export async function ensureDatabaseSchema(client: Client): Promise<void> {
   for (const sql of SCHEMA_STATEMENTS) {
     await client.execute(sql);
+  }
+  const emailCols = await client.execute("PRAGMA table_info(emails);");
+  const hasCounterparty = emailCols.rows.some(
+    (row) => String(row.name) === "counterparty",
+  );
+  if (!hasCounterparty) {
+    await client.execute(
+      "ALTER TABLE emails ADD COLUMN counterparty TEXT NOT NULL DEFAULT 'pricing';",
+    );
   }
 }

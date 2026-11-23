@@ -126,7 +126,8 @@ describe("Drizzle SQLite 11-table schema & bootstrap", () => {
       .values({
         rfpId: rfp.id,
         threadType: "PRICING",
-        direction: "INBOUND",
+        direction: "inbound",
+        counterparty: "pricing",
         sender: "pricing@carrier.example",
         recipient: "rfp-team@carrier.example",
         subject: "Re: Pricing Request",
@@ -137,6 +138,7 @@ describe("Drizzle SQLite 11-table schema & bootstrap", () => {
       })
       .returning();
     assert.ok(email);
+    assert.equal(email.counterparty, "pricing");
 
     await db.insert(pricingResponses).values({
       rfpId: rfp.id,

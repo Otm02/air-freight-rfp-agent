@@ -177,24 +177,25 @@ All agents implement a unified `AgentStep` contract returning `{ status, output,
      3. Run unconstrained Dijkstra -> `fastestUnconstrainedRoute`.
      4. If lane is not `FULLY_SERVABLE`, evaluate proper subsets of `requestedServices` down from size $k-1$ to $1$ to collect all Pareto-maximal `partialOnTimeOptions`.
      5. Assign `categoryComplianceFirst`, `categoryTimeFirst`, and default `disposition` (`QUOTE_COMPLIANT` for `FULLY_SERVABLE`, `PENDING_REVIEW` for non-servable except `UNREACHABLE` defaulting to `DECLINE` [overridable if reviewer adds a manual flight]).
-4. **Pricing Agent (`src/lib/agents/pricing-agent.ts`)**
-   - **Sub-step A (Outbound Request Draft):** Builds a deterministic lane spec table (O-D, selected route hops, transit days, tons, confirmed services) and calls LLM/Offline prose wrapper to draft the Pricing Team request email. Human confirms send.
-   - **Sub-step B (Mock Pricing Team Response Generator):** Produces a realistic, unstructured Pricing Team email (conversational paragraphs, mixed formatting like `"$2,450/t + $300 cold-chain surcharge"` or `"all-in at $1,980 per ton"`, occasional bundled notes) using deterministic lane cost anchors (`basePerTon(hops, days, tons) + servicePremiums`) so realistic market figures exist even offline. Users can also edit the generated text or inject deliberate anomalies (e.g., omit a lane, add a typo, quote `$99,999/t`) to watch HITL Gate #3 catch them!
-   - **Sub-step C (Unstructured Reply Parser & Validator):** Extracts `PricingParseSchema`:
-     ```ts
-     z.object({
-       lanes: z.array(z.object({
-         laneCode: z.string(),
-         recommendedRatePerTonUsd: z.number().positive(),
-         includedServices: z.array(CanonicalServiceEnum),
-         notes: z.string(),
-         confidence: z.number().min(0).max(1),
-       })),
-       unparsedMentions: z.array(z.string()),
-       overallConfidence: z.number().min(0).max(1),
-     })
-     ```
-   - Deterministic verifier checks that every quotable lane has exactly one parsed quote, rate is within `[$150, $25,000]/ton`, and `confidence >= 0.85`. Any violation creates a HITL Pricing Review item.
+4. **Pricing Agent (`src/agents/pricing.ts`) & Isolated Mock Pricing Team (`src/pricing/mock-pricing-team.ts`)**
+   - **Sub-step A (Outbound Request Draft):** Deterministically formats each lane's `laneId`, `origin`, `destination`, `tons`, `route` (airport sequence), `transitDays`, and `requested` vs `fulfillable` services, persisting an outbound email (`threadType: "PRICING"`, `direction: "outbound"`, `counterparty: "pricing"`) into `emails`.
+   - **Sub-step B (Isolated Mock Pricing Team & True Price Model):** Operates as a separate module simulating the carrier's Pricing Desk. It first computes a deterministic **true price per ton (USD)** using an explicit, transparent cost formula:
+     - **Base rate per ton (USD)** from number of flight legs $L = \max(1, \text{routeAirports.length} - 1)$ and total transit days $D$:
+       $$\text{BaseRate}(L, D) = 1200 + 350 \cdot L + 60 \cdot D$$
+     - **Per-service surcharge per ton (USD)** summed across each fulfillable service $s \in S_{\text{fulfilled}}$:
+       - `TEMP_CONTROLLED`: `+$450/ton`
+       - `DANGEROUS_GOODS`: `+$600/ton`
+       - `HIGH_VALUE_SECURITY`: `+$500/ton`
+       - `FRAGILE`: `+$250/ton`
+       - `OVERSIZED`: `+$400/ton`
+     - **Volume discount** based on lane freight tonnage $T$:
+       - $T < 20\text{t}$: $0\%$ ($\times 1.00$)
+       - $20 \le T < 50\text{t}$: $5\%$ ($\times 0.95$)
+       - $T \ge 50\text{t}$: $10\%$ ($\times 0.90$)
+     - **True Price per Ton (USD)** rounded to the nearest `$10/ton` (so `$X.XX/kg` equivalents at $1\text{ ton} = 1,000\text{ kg}$ remain exact to two decimal places):
+       $$\text{TruePricePerTonUSD} = 10 \cdot \text{round}\!\left(\frac{\left(\text{BaseRate}(L, D) + \sum_{s \in S_{\text{fulfilled}}} \text{Surcharge}(s)\right) \cdot (1 - \text{Discount}(T))}{10}\right)$$
+     - The mock Pricing Team then renders an **unstructured email reply** mixing conversational prose and small tables, varied currency/unit formats (`"USD 2,450/t"`, `"$2,450 per ton"`, `"2.45 per kg"`), commercial notes (e.g., `"subject to capacity"`), plus intentional anomalies (e.g., 1 missing lane and 1 ambiguous figure). In Live LLM mode, the LLM rewrites prose for realism while preserving fixed numeric values; `_evalOnlyGroundTruth` is stored separately for evaluation and is never exposed to the parser.
+   - **Sub-step C (Unstructured Reply Parser, Validator & Clarification Loop):** Parses the unstructured email into normalized USD/ton rates with verbatim evidence quotes, unit normalization (`per kg` $\times 1,000 \rightarrow$ `per ton`), and extracted conditions (`PricingParseSchema`). Deterministic validation checks that every requested lane has **exactly one** positive rate within sane bounds (`[$500, $15,000]/ton`) with grounded evidence. Any missing, ambiguous, out-of-range, or ungrounded lane is never guessed and instead creates a `human_tasks` item (`"Pricing unclear for lane X: ask Pricing to clarify or enter manually"`) supporting a one-click **"Send Clarification Email to Pricing"** round trip that resolves the task with Pricing's follow-up reply.
 5. **Quote Agent (`src/lib/agents/quote-agent.ts`)**
    - **Deterministic Assembly:** Computes exact `totalLinePriceUsd = round(approvedRatePerTonUsd * tons, 2)` and grand proposal total, builds the structured per-lane comparison matrix:
      - Route (`A -> B -> C`) & total transit days vs requested max days,
