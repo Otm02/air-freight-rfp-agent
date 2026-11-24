@@ -143,7 +143,7 @@ export function AgentOrchestrationPanel({
   return (
     <aside
       data-testid="agent-orchestration-panel"
-      className="flex min-h-[560px] w-full shrink-0 flex-col border-t border-zinc-800 bg-zinc-950 font-mono text-zinc-300 lg:sticky lg:top-12 lg:h-[calc(100vh-3rem)] lg:min-h-0 lg:w-[360px] xl:w-[400px] lg:border-t-0 lg:border-l"
+      className="flex h-[600px] w-full shrink-0 flex-col border-t border-zinc-800 bg-zinc-950 font-mono text-zinc-300 lg:sticky lg:top-12 lg:h-[calc(100vh-3rem)] lg:w-[360px] xl:w-[400px] lg:border-t-0 lg:border-l"
     >
       {/* Header ------------------------------------------------------- */}
       <div className="flex h-11 shrink-0 items-center justify-between border-b border-zinc-800 px-4">

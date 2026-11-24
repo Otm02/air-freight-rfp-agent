@@ -226,7 +226,7 @@ export function RfpInboxClient({
   const firstRfpWithTasks = rfps.find((r) => r.openTasksCount > 0) ?? rfps[0];
 
   const tabClass = (active: boolean) =>
-    `inline-flex h-7 items-center gap-1.5 rounded-xs px-2.5 text-xs font-medium transition-colors ${
+    `inline-flex h-7 items-center gap-1.5 rounded-xs px-2.5 text-xs font-medium whitespace-nowrap transition-colors ${
       active
         ? "bg-zinc-100 text-zinc-900"
         : "text-zinc-500 hover:text-zinc-900"
@@ -247,7 +247,7 @@ export function RfpInboxClient({
         }}
       />
 
-      <main className="mx-auto max-w-[1120px] space-y-10 px-6 py-10">
+      <main className="mx-auto max-w-[1120px] space-y-10 px-4 py-8 sm:px-6 sm:py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-zinc-900">

@@ -80,6 +80,9 @@ export async function GET(
 
       request.signal.addEventListener("abort", cleanup, { once: true });
 
+      // Flush headers immediately so the client's EventSource opens before the first event.
+      controller.enqueue(encoder.encode(": connected\n\n"));
+
       try {
         const missed = await getEventsAfter(db, rfpId, initialAfterId);
         for (const row of missed) {

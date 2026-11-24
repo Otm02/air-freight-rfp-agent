@@ -44,7 +44,7 @@ export function AppHeader({
 
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white">
-      <div className="flex h-12 items-center justify-between gap-4 px-6">
+      <div className="flex h-12 items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
@@ -60,12 +60,15 @@ export function AppHeader({
 
           {currentRfp && (
             <>
-              <span className="text-zinc-300" aria-hidden="true">
+              <span
+                className="hidden text-zinc-300 sm:inline"
+                aria-hidden="true"
+              >
                 /
               </span>
               <Link
                 href="/"
-                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
+                className="hidden text-sm text-zinc-500 transition-colors hover:text-zinc-900 sm:inline"
               >
                 Inbox
               </Link>
@@ -77,18 +80,19 @@ export function AppHeader({
                   {currentRfp.title}
                 </span>
                 {statusMeta && (
-                  <StatusMark
-                    tone={statusMeta.tone}
-                    label={statusMeta.label}
-                    className="shrink-0"
-                  />
+                  <span className="hidden shrink-0 md:inline-flex">
+                    <StatusMark
+                      tone={statusMeta.tone}
+                      label={statusMeta.label}
+                    />
+                  </span>
                 )}
               </div>
             </>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={handleToggleLlmMode}
@@ -101,7 +105,12 @@ export function AppHeader({
             data-testid="llm-mode-badge"
           >
             <StatusDot tone={isOfflineActive ? "muted" : "ok"} />
-            <span>{activeModelLabel}</span>
+            <span className="hidden whitespace-nowrap lg:inline">
+              {activeModelLabel}
+            </span>
+            <span className="whitespace-nowrap lg:hidden">
+              {isOfflineActive ? "Offline" : "LLM"}
+            </span>
           </button>
 
           <button
@@ -111,7 +120,9 @@ export function AppHeader({
             className="inline-flex h-7 items-center gap-2 rounded-sm border border-zinc-200 bg-white px-2.5 text-xs text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
           >
             <StatusDot tone={openTasksCount > 0 ? "warn" : "muted"} />
-            <span>Needs review</span>
+            <span className="hidden whitespace-nowrap sm:inline">
+              Needs review
+            </span>
             <span
               className={`min-w-4 border-l border-zinc-200 pl-2 text-right font-medium tabular-nums ${
                 openTasksCount > 0 ? "text-zinc-900" : "text-zinc-400"
@@ -134,7 +145,9 @@ export function AppHeader({
               }`}
             >
               <Activity className="h-3 w-3" />
-              <span>Activity log</span>
+              <span className="hidden whitespace-nowrap sm:inline">
+                Activity log
+              </span>
             </button>
           )}
         </div>
