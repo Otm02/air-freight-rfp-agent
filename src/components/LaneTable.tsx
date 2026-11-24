@@ -1,16 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-  ChevronRight,
-  Search,
-  XCircle,
-} from "lucide-react";
+import { ChevronRight, Search } from "lucide-react";
 import type { LaneStatus } from "../domain/types";
 import type { LaneWorkspaceView } from "../orchestrator/types";
+import {
+  PANEL,
+  RoutePath,
+  ServiceMark,
+  StatusMark,
+  TH,
+  INPUT,
+} from "./ui";
 import {
   DISPOSITION_META,
   LANE_STATUS_META,
@@ -87,10 +88,16 @@ export function LaneTable({
     { id: "UNREACHABLE", label: "Unreachable" },
   ];
 
+  const visibleTons = filteredLanes.reduce((sum, l) => sum + l.tons, 0);
+
   return (
-    <div className="rounded-md border border-border/70 bg-white shadow-xs">
-      <div className="flex flex-col gap-2.5 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-1">
+    <div className={`${PANEL} overflow-hidden`}>
+      <div className="flex flex-col gap-2 border-b border-zinc-200 px-3 py-2 xl:flex-row xl:items-center xl:justify-between">
+        <div
+          role="tablist"
+          aria-label="Lane filters"
+          className="flex flex-wrap items-center gap-px"
+        >
           {filterChips.map((chip) => {
             const count = counts[chip.id];
             const active = filter === chip.id;
@@ -98,20 +105,20 @@ export function LaneTable({
               <button
                 key={chip.id}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => setFilter(chip.id)}
                 data-testid={`lane-filter-${chip.id}`}
-                className={`inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-xs font-medium transition-colors ${
+                className={`inline-flex h-7 items-center gap-1.5 rounded-sm px-1.5 text-xs whitespace-nowrap transition-colors ${
                   active
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-border/60 bg-zinc-50/70 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    ? "bg-zinc-100 font-medium text-zinc-900"
+                    : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
                 }`}
               >
                 <span>{chip.label}</span>
                 <span
-                  className={`rounded-sm px-1 text-[11px] tabular-nums ${
-                    active
-                      ? "bg-white/20 text-white"
-                      : "bg-zinc-200/70 text-zinc-700"
+                  className={`tabular-nums ${
+                    active ? "text-zinc-600" : "text-zinc-400"
                   }`}
                 >
                   {count}
@@ -121,37 +128,44 @@ export function LaneTable({
           })}
         </div>
 
-        <div className="relative w-full sm:w-56">
-          <Search className="pointer-events-none absolute top-2 left-2.5 h-3.5 w-3.5 text-zinc-400" />
+        <div className="relative w-full xl:w-44">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter lane, airport, text..."
-            className="h-7 w-full rounded-sm border border-border/70 bg-zinc-50/70 pr-2.5 pl-8 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-hidden"
+            aria-label="Filter lanes"
+            className={`${INPUT} h-7 pl-8 text-xs`}
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left text-xs">
+      <div className="scroll-thin overflow-x-auto">
+        <table className="w-full min-w-[920px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-border/60 bg-zinc-50/60 text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
-              <th className="px-3 py-2 font-medium">Lane</th>
-              <th className="px-2.5 py-2 font-medium">Status</th>
-              <th className="px-2.5 py-2 font-medium">Route & transit</th>
-              <th className="px-2.5 py-2 font-medium">Services</th>
-              <th className="px-2.5 py-2 text-right font-medium">Rate</th>
-              <th className="px-2.5 py-2 font-medium">Decision</th>
-              <th className="px-3 py-2 text-right font-medium">Detail</th>
+            <tr className="border-b border-zinc-200 bg-zinc-50/60">
+              <th className={`${TH} py-2 pr-2 pl-4`}>Lane</th>
+              <th className={`${TH} px-2 py-2`}>Status</th>
+              <th className={`${TH} px-2 py-2`}>Route</th>
+              <th className={`${TH} px-2 py-2 text-right`}>Tons</th>
+              <th className={`${TH} px-2 py-2 text-right`}>SLA</th>
+              <th className={`${TH} px-2 py-2 text-right`}>Transit</th>
+              <th className={`${TH} px-2 py-2`}>Services</th>
+              <th className={`${TH} px-2 py-2 text-right`}>$/t</th>
+              <th className={`${TH} px-2 py-2 text-right`}>Total</th>
+              <th className={`${TH} px-2 py-2`}>Decision</th>
+              <th className="w-8 py-2 pr-3 pl-1">
+                <span className="sr-only">Inspect</span>
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody>
             {filteredLanes.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
-                  className="px-3 py-8 text-center text-xs text-zinc-500"
+                  colSpan={11}
+                  className="px-4 py-10 text-center text-xs text-zinc-500"
                 >
                   No lanes match the active filter.
                 </td>
@@ -164,7 +178,7 @@ export function LaneTable({
                 const dispMeta = lane.assessment
                   ? (DISPOSITION_META[lane.assessment.disposition] ?? {
                       label: lane.assessment.disposition,
-                      badgeClass: "bg-zinc-100 text-zinc-700 border-border/70",
+                      tone: "neutral" as const,
                     })
                   : null;
                 const chosenRoute = lane.assessment?.chosenRoute ?? null;
@@ -175,80 +189,53 @@ export function LaneTable({
                   ]),
                 );
                 const selected = selectedLaneId === lane.id;
+                const daysOver = lane.assessment?.daysOverLimit;
 
                 return (
                   <tr
                     key={lane.id}
                     onClick={() => onSelectLane(lane)}
                     data-testid={`lane-row-${lane.laneCode}`}
-                    className={`cursor-pointer transition-colors ${
-                      selected
-                        ? "bg-zinc-100/90"
-                        : lane.needsDecision
-                          ? "bg-amber-50/25 hover:bg-amber-50/50"
-                          : "hover:bg-zinc-50/90"
+                    className={`group cursor-pointer border-b border-zinc-100 last:border-b-0 transition-colors ${
+                      selected ? "bg-zinc-50" : "hover:bg-zinc-50/70"
                     }`}
                   >
-                    <td className="px-3 py-2 align-top">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-[13px] font-medium text-zinc-900">
+                    <td
+                      className={`border-l-2 py-2 pr-2 pl-[14px] ${
+                        selected ? "border-l-zinc-900" : "border-l-transparent"
+                      }`}
+                    >
+                      <div className="flex items-baseline gap-1.5 whitespace-nowrap">
+                        <span className="font-mono text-sm font-semibold text-zinc-900">
                           {lane.laneCode}
                         </span>
-                        <span className="text-[11px] text-zinc-400 tabular-nums">
+                        <span className="text-xs text-zinc-400 tabular-nums">
                           #{lane.laneNumber}
                         </span>
                       </div>
-                      <div className="mt-0.5 text-[11px] text-zinc-500 tabular-nums">
-                        {lane.tons.toFixed(1)}t · max {lane.maxTransitDays}d
-                      </div>
                     </td>
 
-                    <td className="px-2.5 py-2 align-top">
+                    <td className="px-2 py-2">
                       {statusMeta && (
-                        <span
-                          className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap ${statusMeta.badgeClass}`}
-                        >
-                          {statusMeta.label}
-                        </span>
+                        <StatusMark
+                          tone={statusMeta.tone}
+                          label={statusMeta.label}
+                        />
                       )}
                     </td>
 
-                    <td className="px-2.5 py-2 align-top">
+                    <td className="px-2 py-2">
                       {chosenRoute &&
                       lane.assessment?.disposition !== "DECLINE" ? (
-                        <div>
-                          <div className="flex flex-wrap items-center gap-1">
-                            {chosenRoute.airports.map((code, idx) => (
-                              <span
-                                key={`${lane.id}-${code}-${idx}`}
-                                className="inline-flex items-center gap-1"
-                              >
-                                <span className="rounded-sm border border-border/60 bg-zinc-50 px-1.5 py-px font-mono text-[11px] font-medium text-zinc-800">
-                                  {code}
-                                </span>
-                                {idx < chosenRoute.airports.length - 1 && (
-                                  <ArrowRight className="h-3 w-3 text-zinc-400" />
-                                )}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="mt-1 text-[11px] text-zinc-500 tabular-nums">
-                            <span>
-                              {chosenRoute.totalTransitDays}d (
-                              {chosenRoute.legCount} leg
-                              {chosenRoute.legCount > 1 ? "s" : ""})
-                            </span>
-                            {lane.assessment?.daysOverLimit !== null &&
-                              lane.assessment?.daysOverLimit !== undefined &&
-                              lane.assessment.daysOverLimit > 0 && (
-                                <span className="ml-1.5 font-medium text-amber-700">
-                                  +{lane.assessment.daysOverLimit}d late
-                                </span>
-                              )}
-                          </div>
+                        <div className="flex flex-wrap items-center gap-x-2">
+                          <RoutePath airports={chosenRoute.airports} />
+                          <span className="text-xs whitespace-nowrap text-zinc-400 tabular-nums">
+                            {chosenRoute.legCount} leg
+                            {chosenRoute.legCount > 1 ? "s" : ""}
+                          </span>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-zinc-400 italic">
+                        <span className="text-xs text-zinc-400">
                           {lane.assessment?.disposition === "DECLINE"
                             ? "Declined"
                             : "No compliant route"}
@@ -256,90 +243,108 @@ export function LaneTable({
                       )}
                     </td>
 
-                    <td className="px-2.5 py-2 align-top">
-                      {lane.requestedServices.length === 0 ? (
-                        <span className="inline-flex items-center rounded-sm border border-border/60 bg-zinc-50 px-1.5 py-0.5 text-[11px] text-zinc-600">
-                          Standard
-                        </span>
+                    <td className="px-2 py-2 text-right text-zinc-700 tabular-nums">
+                      {lane.tons.toFixed(1)}
+                    </td>
+
+                    <td className="px-2 py-2 text-right text-zinc-500 tabular-nums">
+                      {lane.maxTransitDays}d
+                    </td>
+
+                    <td className="px-2 py-2 text-right whitespace-nowrap tabular-nums">
+                      {chosenRoute &&
+                      lane.assessment?.disposition !== "DECLINE" ? (
+                        <>
+                          <span className="text-zinc-900">
+                            {chosenRoute.totalTransitDays}d
+                          </span>
+                          {daysOver !== null &&
+                            daysOver !== undefined &&
+                            daysOver > 0 && (
+                              <span
+                                className="ml-1.5 text-xs font-medium text-red-700"
+                                title={`${daysOver}d over the ${lane.maxTransitDays}d limit`}
+                              >
+                                +{daysOver}d late
+                              </span>
+                            )}
+                        </>
                       ) : (
-                        <div className="flex flex-wrap gap-1">
+                        <span className="text-zinc-300">-</span>
+                      )}
+                    </td>
+
+                    <td className="px-2 py-2">
+                      {lane.requestedServices.length === 0 ? (
+                        <span className="text-xs text-zinc-400">Standard</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
                           {lane.requestedServices.map((svc) => {
                             const cov = coverageMap.get(svc);
                             const fulfilled = cov?.fulfilled ?? false;
                             return (
-                              <span
+                              <ServiceMark
                                 key={svc}
+                                fulfilled={fulfilled}
+                                label={SERVICE_SHORT_LABELS[svc]}
                                 title={
                                   fulfilled
                                     ? `${svc}: Fulfilled on all legs`
                                     : `${svc}: Missing on ${cov?.missingOnLegs.join(", ") || "route"}`
                                 }
-                                className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[11px] font-medium ${
-                                  fulfilled
-                                    ? "border-emerald-200/80 bg-emerald-50/70 text-emerald-700"
-                                    : "border-rose-200/80 bg-rose-50/70 text-rose-700"
-                                }`}
-                              >
-                                {fulfilled ? (
-                                  <CheckCircle2 className="h-3 w-3" />
-                                ) : (
-                                  <XCircle className="h-3 w-3" />
-                                )}
-                                {SERVICE_SHORT_LABELS[svc]}
-                              </span>
+                              />
                             );
                           })}
                         </div>
                       )}
                     </td>
 
-                    <td className="px-2.5 py-2 text-right align-top tabular-nums">
+                    <td className="px-2 py-2 text-right tabular-nums">
                       {lane.pricing ? (
-                        <div>
-                          <div className="font-medium text-zinc-900">
-                            {formatUsd(lane.pricing.effectivePricePerTonUsd)}/t
-                          </div>
-                          <div className="text-[11px] text-zinc-500">
-                            {formatUsd(lane.pricing.lineTotalUsd)}
-                          </div>
-                        </div>
+                        <span className="text-zinc-900">
+                          {formatUsd(lane.pricing.effectivePricePerTonUsd)}
+                          <span className="text-zinc-400">/t</span>
+                        </span>
                       ) : (
-                        <span className="text-[11px] text-zinc-400">-</span>
+                        <span className="text-zinc-300">-</span>
                       )}
                     </td>
 
-                    <td className="px-2.5 py-2 align-top">
-                      <div className="flex flex-wrap items-center gap-1">
-                        {lane.needsDecision && (
-                          <span
-                            data-testid={`needs-decision-${lane.laneCode}`}
-                            className="inline-flex items-center gap-1 rounded-sm border border-amber-300/80 bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-900"
-                          >
-                            <AlertTriangle className="h-3 w-3 text-amber-600" />
-                            Needs Decision
-                          </span>
-                        )}
-                        {dispMeta && !lane.needsDecision && (
-                          <span
-                            className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[11px] font-medium ${dispMeta.badgeClass}`}
-                          >
-                            {dispMeta.label}
-                          </span>
-                        )}
-                      </div>
+                    <td className="px-2 py-2 text-right tabular-nums">
+                      {lane.pricing ? (
+                        <span className="font-medium text-zinc-900">
+                          {formatUsd(lane.pricing.lineTotalUsd)}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-300">-</span>
+                      )}
                     </td>
 
-                    <td className="px-3 py-2 text-right align-top">
+                    <td className="px-2 py-2">
+                      {lane.needsDecision && (
+                        <span data-testid={`needs-decision-${lane.laneCode}`}>
+                          <StatusMark tone="warn" label="Needs Decision" />
+                        </span>
+                      )}
+                      {dispMeta && !lane.needsDecision && (
+                        <StatusMark
+                          tone={dispMeta.tone}
+                          label={dispMeta.label}
+                        />
+                      )}
+                    </td>
+
+                    <td className="py-2 pr-3 pl-1 text-right">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectLane(lane);
                         }}
-                        className="inline-flex items-center gap-1 rounded-sm border border-border/70 bg-white px-2 py-0.5 text-[11px] font-medium text-zinc-700 hover:border-border hover:bg-zinc-50"
+                        aria-label={`Inspect lane ${lane.laneCode}`}
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-sm text-zinc-400 transition-colors group-hover:text-zinc-700 hover:bg-zinc-100"
                       >
-                        Inspect
-                        <ChevronRight className="h-3 w-3" />
+                        <ChevronRight className="h-3.5 w-3.5" />
                       </button>
                     </td>
                   </tr>
@@ -348,6 +353,13 @@ export function LaneTable({
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50/60 px-4 py-1.5 text-xs text-zinc-500 tabular-nums">
+        <span>
+          {filteredLanes.length} of {lanes.length} lanes
+        </span>
+        <span>{visibleTons.toLocaleString("en-US", { maximumFractionDigits: 1 })}t</span>
       </div>
     </div>
   );

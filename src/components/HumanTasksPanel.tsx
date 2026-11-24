@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import {
-  AlertCircle,
-  CheckCircle2,
-  DollarSign,
-  Mail,
-  Send,
-  ShieldCheck,
-} from "lucide-react";
+import { Check, Mail, Send, ShieldCheck } from "lucide-react";
 import { SERVICE_TYPES, type ServiceType } from "../domain/types";
 import type {
   HumanTaskView,
   LaneWorkspaceView,
   ProposalView,
 } from "../orchestrator/types";
+import {
+  INPUT,
+  PANEL,
+  PANEL_HEADER,
+  StatusDot,
+  buttonClass,
+} from "./ui";
 import { SERVICE_FULL_LABELS, formatDateTimeShort, formatUsd } from "./ui-helpers";
 
 interface HumanTasksPanelProps {
@@ -56,6 +56,8 @@ interface HumanTasksPanelProps {
     outcome: "RETURN_TO_SENT" | "CLOSE_LOST",
   ) => Promise<void>;
 }
+
+const ACTION_WELL = "rounded-sm border border-zinc-200 bg-zinc-50/60 p-3";
 
 export function HumanTasksPanel({
   tasks,
@@ -99,15 +101,16 @@ export function HumanTasksPanel({
   };
 
   return (
-    <div className="space-y-5" data-testid="human-tasks-panel">
-      <div className="rounded-md border border-border/70 bg-white shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
+    <div className="space-y-6" data-testid="human-tasks-panel">
+      <div className={PANEL}>
+        <div className={PANEL_HEADER}>
           <div className="flex items-center gap-2">
-            <AlertCircle
-              className={`h-4 w-4 ${openTasks.length > 0 ? "text-amber-600" : "text-emerald-600"}`}
-            />
-            <h2 className="text-[13px] font-medium text-zinc-900">
-              Open Review Tasks ({openTasks.length})
+            <StatusDot tone={openTasks.length > 0 ? "warn" : "ok"} />
+            <h2 className="text-sm font-medium text-zinc-900">
+              Open Review Tasks
+              <span className="ml-1.5 font-normal text-zinc-500 tabular-nums">
+                ({openTasks.length})
+              </span>
             </h2>
           </div>
 
@@ -117,7 +120,7 @@ export function HumanTasksPanel({
               disabled={busy}
               onClick={() => onClarifyPricing()}
               data-testid="clarify-all-pricing-btn"
-              className="inline-flex items-center gap-1.5 rounded-sm bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+              className={buttonClass("primary")}
             >
               <Mail className="h-3.5 w-3.5" />
               Clarify All Pricing via Email
@@ -126,9 +129,9 @@ export function HumanTasksPanel({
         </div>
 
         {openTasks.length === 0 ? (
-          <div className="px-4 py-7 text-center">
-            <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-600" />
-            <p className="mt-1.5 text-[13px] font-medium text-zinc-800">
+          <div className="px-4 py-12 text-center">
+            <Check className="mx-auto h-4 w-4 text-zinc-400" />
+            <p className="mt-2 text-sm font-medium text-zinc-900">
               No open tasks for this stage.
             </p>
             <p className="mt-0.5 text-xs text-zinc-500">
@@ -136,7 +139,7 @@ export function HumanTasksPanel({
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-border/60">
+          <div className="divide-y divide-zinc-200">
             {openTasks.map((task) => {
               const lane =
                 task.laneId !== null ? laneById.get(task.laneId) : undefined;
@@ -145,25 +148,26 @@ export function HumanTasksPanel({
                 <div
                   key={task.id}
                   data-testid={`open-task-${task.taskType}-${task.laneCode ?? "rfp"}`}
-                  className="space-y-2.5 p-4"
+                  className="space-y-3 px-4 py-4"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="rounded-sm border border-amber-300/80 bg-amber-50/90 px-1.5 py-px font-mono text-[11px] font-medium text-amber-900">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                        <StatusDot tone="warn" />
+                        <span className="font-mono text-2xs font-medium tracking-[0.04em] text-zinc-500">
                           {task.taskType}
                         </span>
                         {task.laneCode && (
-                          <span className="rounded-sm border border-border/60 bg-zinc-50 px-1.5 py-px font-mono text-[11px] font-medium text-zinc-800">
+                          <span className="font-mono text-xs font-semibold text-zinc-900">
                             {task.laneCode}
                           </span>
                         )}
-                        <h3 className="text-[13px] font-medium text-zinc-900">
-                          {task.title}
-                        </h3>
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-zinc-600">
-                        <span className="font-medium text-zinc-800">
+                      <h3 className="mt-1.5 text-sm font-medium text-zinc-900">
+                        {task.title}
+                      </h3>
+                      <p className="mt-1 max-w-3xl text-xs leading-relaxed text-zinc-600">
+                        <span className="font-medium text-zinc-900">
                           Recommendation:{" "}
                         </span>
                         {task.reason}
@@ -174,7 +178,7 @@ export function HumanTasksPanel({
                       <button
                         type="button"
                         onClick={() => onInspectLane(lane.id)}
-                        className="shrink-0 rounded-sm border border-border/70 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                        className={buttonClass("secondary")}
                       >
                         Inspect Lane
                       </button>
@@ -182,25 +186,30 @@ export function HumanTasksPanel({
                   </div>
 
                   {task.taskType === "CONFIRM_REQUIREMENTS" && lane && (
-                    <div className="rounded-sm border border-border/70 bg-zinc-50/70 p-3">
-                      <p className="mb-2 text-xs text-zinc-600 italic">
+                    <div className={ACTION_WELL}>
+                      <p className="mb-2.5 border-l-2 border-zinc-300 pl-2.5 text-xs leading-relaxed text-zinc-600">
                         &ldquo;{lane.rawEmail}&rdquo;
                       </p>
                       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
                         {SERVICE_TYPES.map((svc) => {
                           const current = getDraftServices(lane);
+                          const checked = current.includes(svc);
                           return (
                             <label
                               key={svc}
-                              className="flex cursor-pointer items-center gap-2 rounded-sm border border-border/70 bg-white px-2 py-1 text-xs"
+                              className={`flex cursor-pointer items-center gap-2 rounded-sm border bg-white px-2.5 py-1.5 text-xs transition-colors ${
+                                checked
+                                  ? "border-zinc-900 text-zinc-900"
+                                  : "border-zinc-200 text-zinc-700 hover:border-zinc-300"
+                              }`}
                             >
                               <input
                                 type="checkbox"
-                                checked={current.includes(svc)}
+                                checked={checked}
                                 onChange={() =>
                                   toggleDraftService(lane.id, current, svc)
                                 }
-                                className="accent-zinc-900"
+                                className="h-3.5 w-3.5 accent-zinc-900"
                               />
                               <span>{SERVICE_FULL_LABELS[svc]}</span>
                             </label>
@@ -218,15 +227,15 @@ export function HumanTasksPanel({
                           )
                         }
                         data-testid={`confirm-req-btn-${lane.laneCode}`}
-                        className="mt-2.5 rounded-sm bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className={buttonClass("primary", "md", "mt-3")}
                       >
-                        Confirm Requirements & Re-Route
+                        Confirm Requirements &amp; Re-Route
                       </button>
                     </div>
                   )}
 
                   {task.taskType === "LANE_ROUTE_DECISION" && lane && (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {lane.assessment?.bestCompliantRoute && (
                         <button
                           type="button"
@@ -234,9 +243,9 @@ export function HumanTasksPanel({
                           onClick={() =>
                             onRouteDecision(lane.id, "QUOTE_COMPLIANT_LATE")
                           }
-                          className="rounded-sm border border-amber-300/80 bg-amber-50/80 px-2.5 py-1.5 text-xs font-medium text-amber-950 hover:bg-amber-100/70 disabled:opacity-50"
+                          className={buttonClass("secondary", "md")}
                         >
-                          Quote compliant route & ask for +
+                          Quote compliant route &amp; ask for +
                           {Math.max(
                             0,
                             lane.assessment.bestCompliantRoute.totalTransitDays -
@@ -253,16 +262,16 @@ export function HumanTasksPanel({
                           onClick={() =>
                             onRouteDecision(lane.id, "QUOTE_PARTIAL_ON_TIME", 0)
                           }
-                          className="rounded-sm border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+                          className={buttonClass("secondary", "md")}
                         >
-                          Quote on-time route & disclose missing services
+                          Quote on-time route &amp; disclose missing services
                         </button>
                       ) : null}
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => onRouteDecision(lane.id, "DECLINE")}
-                        className="rounded-sm border border-rose-200 bg-rose-50/70 px-2.5 py-1.5 text-xs font-medium text-rose-800 hover:bg-rose-100/70 disabled:opacity-50"
+                        className={buttonClass("danger", "md")}
                       >
                         Decline lane
                       </button>
@@ -270,23 +279,27 @@ export function HumanTasksPanel({
                   )}
 
                   {task.taskType === "CLARIFY_PRICING" && lane && (
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => onClarifyPricing(task.id)}
                         data-testid={`send-pricing-clarification-${lane.laneCode}`}
-                        className="inline-flex items-center gap-1.5 rounded-sm bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className={buttonClass("primary", "md")}
                       >
                         <Mail className="h-3.5 w-3.5" />
                         Send Clarification Email to Pricing
                       </button>
 
-                      <span className="text-xs text-zinc-400">or</span>
+                      <span className="text-2xs tracking-[0.06em] text-zinc-400 uppercase">
+                        or
+                      </span>
 
-                      <div className="inline-flex items-center gap-1.5">
+                      <div className="inline-flex items-center gap-2">
                         <div className="relative">
-                          <DollarSign className="pointer-events-none absolute top-2 left-2 h-3.5 w-3.5 text-zinc-400" />
+                          <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-xs text-zinc-400">
+                            $
+                          </span>
                           <input
                             type="number"
                             min={100}
@@ -300,7 +313,7 @@ export function HumanTasksPanel({
                               }))
                             }
                             data-testid={`manual-price-input-${lane.laneCode}`}
-                            className="h-7 w-28 rounded-sm border border-border/70 pr-2 pl-6 text-xs tabular-nums focus:border-zinc-400 focus:outline-hidden"
+                            className={`${INPUT} h-8 w-32 pl-6 text-right tabular-nums`}
                           />
                         </div>
                         <button
@@ -318,7 +331,7 @@ export function HumanTasksPanel({
                             )
                           }
                           data-testid={`manual-price-submit-${lane.laneCode}`}
-                          className="h-7 rounded-sm border border-border bg-white px-2.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-45"
+                          className={buttonClass("secondary", "md")}
                         >
                           Save Manual Rate (/t)
                         </button>
@@ -327,15 +340,15 @@ export function HumanTasksPanel({
                   )}
 
                   {task.taskType === "APPROVE_QUOTE" && proposal && (
-                    <div className="rounded-sm border border-border/70 bg-zinc-50/70 p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="text-xs text-zinc-600">
+                    <div className={ACTION_WELL}>
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="text-xs text-zinc-600 tabular-nums">
                           Proposal v{proposal.version}:{" "}
                           <span className="font-medium text-zinc-900">
                             {proposal.totalQuotedLanes} quoted
                           </span>
                           , {proposal.totalDeclinedLanes} declined ·{" "}
-                          <span className="font-medium text-zinc-900 tabular-nums">
+                          <span className="font-medium text-zinc-900">
                             {formatUsd(proposal.totalValueUsd, 2)} USD
                           </span>
                         </div>
@@ -345,7 +358,7 @@ export function HumanTasksPanel({
                             value={reviewerEmail}
                             onChange={(e) => onReviewerEmailChange(e.target.value)}
                             aria-label="Approver identifier"
-                            className="h-7 w-52 rounded-sm border border-border/70 bg-white px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-hidden"
+                            className={`${INPUT} h-8 w-56 text-xs`}
                           />
                           <button
                             type="button"
@@ -357,10 +370,10 @@ export function HumanTasksPanel({
                               )
                             }
                             data-testid="approve-send-quote-btn"
-                            className="inline-flex h-7 items-center gap-1.5 rounded-sm bg-emerald-700 px-3 text-xs font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+                            className={buttonClass("approve", "md")}
                           >
                             <ShieldCheck className="h-3.5 w-3.5" />
-                            Approve & Send Customer Quote
+                            Approve &amp; Send Customer Quote
                           </button>
                         </div>
                       </div>
@@ -369,7 +382,7 @@ export function HumanTasksPanel({
 
                   {(task.taskType === "CUSTOMER_QUESTION" ||
                     task.taskType === "CUSTOMER_REPLY_REVIEW") && (
-                    <div className="space-y-2 rounded-sm border border-border/70 bg-zinc-50/70 p-3">
+                    <div className={`${ACTION_WELL} space-y-2.5`}>
                       <textarea
                         rows={2}
                         placeholder="Record clarification sent to shipper or resolution note..."
@@ -380,9 +393,9 @@ export function HumanTasksPanel({
                             [task.id]: e.target.value,
                           }))
                         }
-                        className="w-full rounded-sm border border-border/70 bg-white px-2.5 py-1.5 text-xs focus:border-zinc-400 focus:outline-hidden"
+                        className={`${INPUT} resize-none py-1.5 text-xs`}
                       />
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
                           disabled={busy || !(followUpNotes[task.id] ?? "").trim()}
@@ -393,10 +406,10 @@ export function HumanTasksPanel({
                               "RETURN_TO_SENT",
                             )
                           }
-                          className="inline-flex items-center gap-1.5 rounded-sm bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-45"
+                          className={buttonClass("primary", "md")}
                         >
                           <Send className="h-3.5 w-3.5" />
-                          Send Follow-Up & Reopen Quote
+                          Send Follow-Up &amp; Reopen Quote
                         </button>
                         <button
                           type="button"
@@ -409,7 +422,7 @@ export function HumanTasksPanel({
                               "CLOSE_LOST",
                             )
                           }
-                          className="rounded-sm border border-rose-200 bg-rose-50/70 px-2.5 py-1.5 text-xs font-medium text-rose-800 hover:bg-rose-100/70 disabled:opacity-50"
+                          className={buttonClass("danger", "md")}
                         >
                           Close Deal Lost
                         </button>
@@ -424,28 +437,31 @@ export function HumanTasksPanel({
       </div>
 
       {resolvedTasks.length > 0 && (
-        <div className="rounded-md border border-border/70 bg-white shadow-xs">
-          <div className="border-b border-border/60 px-4 py-2.5">
-            <h3 className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
-              Resolved Checkpoints ({resolvedTasks.length})
+        <div className={PANEL}>
+          <div className="flex h-9 items-center border-b border-zinc-200 px-4">
+            <h3 className="eyebrow">
+              Resolved Checkpoints
+              <span className="ml-1.5 tabular-nums">
+                ({resolvedTasks.length})
+              </span>
             </h3>
           </div>
-          <div className="divide-y divide-border/50">
+          <div className="divide-y divide-zinc-100">
             {resolvedTasks.map((task) => (
               <div
                 key={task.id}
                 className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs"
               >
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <div className="flex items-center gap-2.5">
+                  <Check className="h-3.5 w-3.5 text-zinc-400" />
                   {task.laneCode && (
-                    <span className="rounded-sm bg-zinc-100 px-1.5 py-px font-mono text-[11px] font-medium text-zinc-700">
+                    <span className="font-mono font-semibold text-zinc-900">
                       {task.laneCode}
                     </span>
                   )}
-                  <span className="font-medium text-zinc-800">{task.title}</span>
+                  <span className="text-zinc-700">{task.title}</span>
                 </div>
-                <span className="text-[11px] text-zinc-400 tabular-nums">
+                <span className="text-xs text-zinc-400 tabular-nums">
                   {task.status} ·{" "}
                   {task.resolvedAt ? formatDateTimeShort(task.resolvedAt) : ""}
                 </span>
