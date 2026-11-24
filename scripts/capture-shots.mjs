@@ -19,6 +19,9 @@ const fixture = path.join(root, "tests", "fixtures", "demo_upload_rfp.xlsx");
 const browser = await chromium.launch();
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
+  // At 1x, headless Chromium snaps glyphs to whole pixels and collapses
+  // periods and spaces in 11-13px text; GitHub then downsamples the image.
+  deviceScaleFactor: 2,
 });
 await context.addCookies([
   { name: "rfp_llm_mode", value: "offline", url: baseUrl },
@@ -27,6 +30,10 @@ const page = await context.newPage();
 page.setDefaultTimeout(30_000);
 
 const capture = async (fileName) => {
+  await page
+    .getByTestId("sse-connection-pill")
+    .filter({ hasText: "Live SSE" })
+    .waitFor();
   // Let tab underline transitions and streamed log events settle.
   await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(outDir, fileName) });
