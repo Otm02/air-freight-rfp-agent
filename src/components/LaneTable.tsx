@@ -94,7 +94,7 @@ export function LaneTable({
     <div className={`${PANEL} overflow-hidden`}>
       <div className="flex flex-col gap-2 border-b border-zinc-200 px-3 py-2 xl:flex-row xl:items-center xl:justify-between">
         <div
-          role="tablist"
+          role="group"
           aria-label="Lane filters"
           className="flex flex-wrap items-center gap-px"
         >
@@ -105,8 +105,7 @@ export function LaneTable({
               <button
                 key={chip.id}
                 type="button"
-                role="tab"
-                aria-selected={active}
+                aria-pressed={active}
                 onClick={() => setFilter(chip.id)}
                 data-testid={`lane-filter-${chip.id}`}
                 className={`inline-flex h-7 items-center gap-1.5 rounded-sm px-1.5 text-xs whitespace-nowrap transition-colors ${

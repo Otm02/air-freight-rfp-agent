@@ -159,6 +159,15 @@ export function LaneDetailDrawer({
     }
   }, [lane]);
 
+  useEffect(() => {
+    if (!lane) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lane, onClose]);
+
   if (!lane) {
     return null;
   }
@@ -440,9 +449,13 @@ export function LaneDetailDrawer({
                               label={SERVICE_FULL_LABELS[svc]}
                             />
                             {missingLegs.length > 0 && (
-                              <span className="ml-1 font-mono text-2xs text-red-700">
-                                (missing on {missingLegs.join(", ")})
-                              </span>
+                              <div className="mt-0.5 pl-4 text-2xs text-zinc-500">
+                                (missing on{" "}
+                                <span className="font-mono">
+                                  {missingLegs.join(", ")}
+                                </span>
+                                )
+                              </div>
                             )}
                           </div>
                         );

@@ -280,7 +280,7 @@ export function RfpWorkspaceClient({
       />
 
       <div className="flex flex-col lg:flex-row lg:items-start">
-        <main className="min-w-0 flex-1 px-6 py-8 lg:px-8 lg:py-10">
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
           <div className="mx-auto max-w-[1120px] space-y-8">
             {errorBanner && (
               <div

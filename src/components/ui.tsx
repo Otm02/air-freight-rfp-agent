@@ -10,7 +10,7 @@ export const PANEL = "rounded-md border border-zinc-200 bg-white";
 
 /** Panel header strip. */
 export const PANEL_HEADER =
-  "flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 h-11";
+  "flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-zinc-200 px-4 py-2";
 
 /** Text input / textarea / select. */
 export const INPUT =

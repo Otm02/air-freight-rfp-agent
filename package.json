@@ -16,7 +16,8 @@
     "export-assessments": "tsx scripts/export-assessments.ts",
     "eval:intake": "tsx scripts/eval-intake.ts",
     "eval:pricing": "tsx scripts/eval-pricing.ts",
-    "demo:e2e": "tsx scripts/demo-quote-deal.ts"
+    "demo:e2e": "tsx scripts/demo-quote-deal.ts",
+    "capture-shots": "node scripts/capture-shots.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.19",
