@@ -62,6 +62,9 @@
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
     letter-spacing: -0.006em;
+    /* Geist's proportional "1" kerns into adjacent periods ("157.1t" reads as
+       "1571t"), so every figure in prose uses tabular widths as well. */
+    font-variant-numeric: tabular-nums;
     background-color: var(--color-canvas);
     color: var(--color-ink);
   }
