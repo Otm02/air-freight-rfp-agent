@@ -42,7 +42,6 @@ export function RfpInboxClient({
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Custom form state
   const [customTitle, setCustomTitle] = useState("Q1 Nordics Pharma Trial RFP");
   const [customerName, setCustomerName] = useState("Dr. Jonas Lind");
   const [customerEmail, setCustomerEmail] = useState(
@@ -59,7 +58,6 @@ export function RfpInboxClient({
     },
   ]);
 
-  // XLSX upload state
   const [xlsxFile, setXlsxFile] = useState<File | null>(null);
   const [xlsxTitle, setXlsxTitle] = useState("");
   const [xlsxCustomerName, setXlsxCustomerName] = useState("");
@@ -85,8 +83,7 @@ export function RfpInboxClient({
         destination: "MEX",
         tons: "18.0",
         maxTransitDays: "17",
-        rawEmail:
-          "DFW to MEX requires high-value security on all flights.",
+        rawEmail: "DFW to MEX requires high-value security on all flights.",
       },
     ]);
   };
@@ -105,10 +102,7 @@ export function RfpInboxClient({
     ]);
   };
 
-  const updateLaneRow = (
-    idx: number,
-    patch: Partial<CustomLaneDraft>,
-  ) => {
+  const updateLaneRow = (idx: number, patch: Partial<CustomLaneDraft>) => {
     setCustomLanes((prev) =>
       prev.map((row, i) => (i === idx ? { ...row, ...patch } : row)),
     );
@@ -161,7 +155,7 @@ export function RfpInboxClient({
   const handleUploadXlsx = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!xlsxFile) {
-      setErrorMsg("Please select a .xlsx workbook first.");
+      setErrorMsg("Select a .xlsx workbook first.");
       return;
     }
     setBusy(true);
@@ -224,7 +218,7 @@ export function RfpInboxClient({
   const firstRfpWithTasks = rfps.find((r) => r.openTasksCount > 0) ?? rfps[0];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-canvas">
       <AppHeader
         activeModelLabel={activeModelLabel}
         openTasksCount={totalOpenTasks}
@@ -235,15 +229,14 @@ export function RfpInboxClient({
         }}
       />
 
-      <main className="mx-auto max-w-[1440px] space-y-6 px-4 py-6 sm:px-6">
-        {/* Title & Value Prop Strip */}
+      <main className="mx-auto max-w-[1440px] space-y-5 px-4 py-5 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              RFP Response Inbox
+            <h1 className="text-lg font-medium tracking-tight text-zinc-900">
+              RFP Inbox
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Deterministic flight-graph routing & SLA verification paired with schema-validated AI text agents and auditable human checkpoints.
+            <p className="mt-0.5 text-xs text-zinc-500">
+              Ingest shipper workbooks or lane requests. Routing runs deterministically; ambiguous requirements, pricing gaps, and final quotes pause for sign-off.
             </p>
           </div>
           <button
@@ -256,107 +249,106 @@ export function RfpInboxClient({
                 setRfps(json.rfps);
               }
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="h-7 rounded-sm border border-border/70 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
           >
-            Refresh List
+            Refresh
           </button>
         </div>
 
-        {/* RFP List Table */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-2xs">
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Active & Seeded RFPs ({rfps.length})
+        <section className="rounded-md border border-border/70 bg-white shadow-xs">
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
+            <h2 className="text-[13px] font-medium text-zinc-900">
+              RFPs ({rfps.length})
             </h2>
-            <span className="text-xs text-slate-500">
-              Click any RFP to open workspace, human checkpoints & live SSE agent graph
+            <span className="text-[11px] text-zinc-500">
+              Select a tender to inspect lanes, resolve checkpoints, or view the activity log
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
-                  <th className="px-5 py-2.5">RFP Title & Customer</th>
-                  <th className="px-3 py-2.5">Pipeline Status</th>
-                  <th className="px-3 py-2.5 text-right">Scope</th>
-                  <th className="px-3 py-2.5 text-center">Open Tasks</th>
-                  <th className="px-3 py-2.5 text-right">Est. / Booked Value</th>
-                  <th className="px-3 py-2.5">Updated</th>
-                  <th className="px-5 py-2.5 text-right">Workspace</th>
+                <tr className="border-b border-border/60 bg-zinc-50/60 text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+                  <th className="px-4 py-2 font-medium">RFP & Shipper</th>
+                  <th className="px-3 py-2 font-medium">Stage</th>
+                  <th className="px-3 py-2 text-right font-medium">Scope</th>
+                  <th className="px-3 py-2 text-center font-medium">Tasks</th>
+                  <th className="px-3 py-2 text-right font-medium">Value</th>
+                  <th className="px-3 py-2 font-medium">Updated</th>
+                  <th className="px-4 py-2 text-right font-medium">Open</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border/50">
                 {rfps.map((item) => {
                   const statusMeta = getRfpStatusBadge(item.status);
                   return (
                     <tr
                       key={item.id}
                       data-testid={`inbox-rfp-row-${item.id}`}
-                      className="transition hover:bg-slate-50"
+                      className="transition-colors hover:bg-zinc-50/80"
                     >
-                      <td className="px-5 py-3.5">
+                      <td className="px-4 py-2.5">
                         <Link
                           href={`/rfps/${item.id}`}
-                          className="text-sm font-semibold text-slate-900 hover:text-[#1E3A5F]"
+                          className="text-[13px] font-medium text-zinc-900 hover:underline"
                         >
                           {item.title}
                         </Link>
-                        <div className="mt-0.5 text-xs text-slate-500">
+                        <div className="mt-0.5 text-[11px] text-zinc-500">
                           {item.customerName} ·{" "}
                           <span className="font-mono">{item.customerEmail}</span>
                         </div>
                       </td>
 
-                      <td className="px-3 py-3.5">
+                      <td className="px-3 py-2.5">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusMeta.badgeClass}`}
+                          className={`inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-px text-[11px] font-medium ${statusMeta.badgeClass}`}
                         >
                           {item.isWaitingForHuman && (
-                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-600" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                           )}
                           {statusMeta.label}
                         </span>
                       </td>
 
-                      <td className="px-3 py-3.5 text-right tabular-nums">
-                        <div className="font-semibold text-slate-900">
+                      <td className="px-3 py-2.5 text-right tabular-nums">
+                        <div className="font-medium text-zinc-900">
                           {item.laneCount} lanes
                         </div>
-                        <div className="text-[11px] text-slate-500">
-                          {item.totalTons.toLocaleString("en-US")} t
+                        <div className="text-[11px] text-zinc-500">
+                          {item.totalTons.toLocaleString("en-US")}t
                         </div>
                       </td>
 
-                      <td className="px-3 py-3.5 text-center">
+                      <td className="px-3 py-2.5 text-center">
                         {item.openTasksCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-900 tabular-nums">
-                            <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+                          <span className="inline-flex items-center gap-1 rounded-sm border border-amber-300/80 bg-amber-50 px-1.5 py-px text-[11px] font-medium text-amber-900 tabular-nums">
+                            <AlertCircle className="h-3 w-3 text-amber-600" />
                             {item.openTasksCount}
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-400">0</span>
+                          <span className="text-xs text-zinc-400">0</span>
                         )}
                       </td>
 
-                      <td className="px-3 py-3.5 text-right font-semibold text-slate-900 tabular-nums">
+                      <td className="px-3 py-2.5 text-right font-medium text-zinc-900 tabular-nums">
                         {item.estimatedRevenueUsd > 0
                           ? formatUsd(item.estimatedRevenueUsd, 2)
-                          : "—"}
+                          : "-"}
                       </td>
 
-                      <td className="px-3 py-3.5 text-xs text-slate-500">
+                      <td className="px-3 py-2.5 text-[11px] text-zinc-500">
                         {formatDateTimeShort(item.updatedAt)}
                       </td>
 
-                      <td className="px-5 py-3.5 text-right">
+                      <td className="px-4 py-2.5 text-right">
                         <Link
                           href={`/rfps/${item.id}`}
                           data-testid={`open-rfp-${item.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg bg-[#1E3A5F] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162C49]"
+                          className="inline-flex h-7 items-center gap-1 rounded-sm bg-zinc-900 px-2.5 text-xs font-medium text-white hover:bg-zinc-800"
                         >
                           Open
-                          <ArrowRight className="h-3.5 w-3.5" />
+                          <ArrowRight className="h-3 w-3" />
                         </Link>
                       </td>
                     </tr>
@@ -367,35 +359,34 @@ export function RfpInboxClient({
           </div>
         </section>
 
-        {/* New RFP Ingestion Card */}
-        <section className="rounded-xl border border-slate-200 bg-white shadow-2xs">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Ingest New Shipper RFP
+        <section className="rounded-md border border-border/70 bg-white shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
+            <h2 className="text-[13px] font-medium text-zinc-900">
+              New Shipper RFP
             </h2>
 
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs">
+            <div className="inline-flex rounded-sm border border-border/70 bg-zinc-50 p-0.5 text-xs">
               <button
                 type="button"
                 onClick={() => setCreateTab("custom")}
                 data-testid="ingest-tab-custom"
-                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 font-medium ${
                   createTab === "custom"
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-600"
+                    ? "bg-white text-zinc-900 shadow-xs"
+                    : "text-zinc-600"
                 }`}
               >
                 <MailPlus className="h-3.5 w-3.5" />
-                Shipper Email + Table
+                Email + Table
               </button>
               <button
                 type="button"
                 onClick={() => setCreateTab("xlsx")}
                 data-testid="ingest-tab-xlsx"
-                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 font-medium ${
                   createTab === "xlsx"
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-600"
+                    ? "bg-white text-zinc-900 shadow-xs"
+                    : "text-zinc-600"
                 }`}
               >
                 <Upload className="h-3.5 w-3.5" />
@@ -405,43 +396,43 @@ export function RfpInboxClient({
                 type="button"
                 onClick={() => setCreateTab("preset")}
                 data-testid="ingest-tab-preset"
-                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 font-medium ${
                   createTab === "preset"
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-600"
+                    ? "bg-white text-zinc-900 shadow-xs"
+                    : "text-zinc-600"
                 }`}
               >
                 <Database className="h-3.5 w-3.5" />
-                Workbook Presets
+                Presets
               </button>
             </div>
           </div>
 
-          <div className="p-5">
+          <div className="p-4">
             {errorMsg && (
-              <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-900">
+              <div className="mb-3 rounded-sm border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900">
                 {errorMsg}
               </div>
             )}
 
             {createTab === "custom" && (
-              <form onSubmit={handleCreateCustom} className="space-y-4">
+              <form onSubmit={handleCreateCustom} className="space-y-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs text-slate-600">
-                    Submit shipper contact details + raw lane emails. Out-of-catalog phrases (like dry ice or -20 C) trigger a human requirement confirmation checkpoint.
+                  <p className="text-xs text-zinc-500">
+                    Enter shipper metadata and lane text. Unrecognized terms (such as dry ice or -20 C) pause intake for manual confirmation.
                   </p>
                   <button
                     type="button"
                     onClick={loadAmbiguousSample}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    className="rounded-sm border border-border/70 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
                   >
                     Load Ambiguous Sample
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">
+                    <label className="mb-1 block text-[11px] font-medium text-zinc-600">
                       RFP Title
                     </label>
                     <input
@@ -450,11 +441,11 @@ export function RfpInboxClient({
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
                       data-testid="custom-rfp-title"
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:border-[#1E3A5F] focus:outline-hidden"
+                      className="h-8 w-full rounded-sm border border-border/70 px-2.5 text-xs focus:border-zinc-400 focus:outline-hidden"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">
+                    <label className="mb-1 block text-[11px] font-medium text-zinc-600">
                       Customer Name
                     </label>
                     <input
@@ -463,11 +454,11 @@ export function RfpInboxClient({
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       data-testid="custom-customer-name"
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:border-[#1E3A5F] focus:outline-hidden"
+                      className="h-8 w-full rounded-sm border border-border/70 px-2.5 text-xs focus:border-zinc-400 focus:outline-hidden"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">
+                    <label className="mb-1 block text-[11px] font-medium text-zinc-600">
                       Customer Email
                     </label>
                     <input
@@ -476,19 +467,19 @@ export function RfpInboxClient({
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
                       data-testid="custom-customer-email"
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:border-[#1E3A5F] focus:outline-hidden"
+                      className="h-8 w-full rounded-sm border border-border/70 px-2.5 text-xs focus:border-zinc-400 focus:outline-hidden"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {customLanes.map((row, idx) => (
                     <div
                       key={idx}
-                      className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 bg-slate-50/70 p-3 sm:grid-cols-[80px_80px_80px_90px_minmax(0,1fr)_auto]"
+                      className="grid grid-cols-1 gap-2 rounded-sm border border-border/70 bg-zinc-50/60 p-2.5 sm:grid-cols-[72px_72px_76px_84px_minmax(0,1fr)_auto]"
                     >
                       <div>
-                        <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">
+                        <label className="mb-1 block text-[10px] font-medium text-zinc-500 uppercase">
                           Origin
                         </label>
                         <input
@@ -501,11 +492,11 @@ export function RfpInboxClient({
                               origin: e.target.value.toUpperCase(),
                             })
                           }
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1 font-mono text-xs uppercase"
+                          className="h-7 w-full rounded-sm border border-border/70 bg-white px-2 font-mono text-xs uppercase"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">
+                        <label className="mb-1 block text-[10px] font-medium text-zinc-500 uppercase">
                           Dest
                         </label>
                         <input
@@ -518,11 +509,11 @@ export function RfpInboxClient({
                               destination: e.target.value.toUpperCase(),
                             })
                           }
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1 font-mono text-xs uppercase"
+                          className="h-7 w-full rounded-sm border border-border/70 bg-white px-2 font-mono text-xs uppercase"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">
+                        <label className="mb-1 block text-[10px] font-medium text-zinc-500 uppercase">
                           Tons
                         </label>
                         <input
@@ -534,11 +525,11 @@ export function RfpInboxClient({
                           onChange={(e) =>
                             updateLaneRow(idx, { tons: e.target.value })
                           }
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs tabular-nums"
+                          className="h-7 w-full rounded-sm border border-border/70 bg-white px-2 text-xs tabular-nums"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">
+                        <label className="mb-1 block text-[10px] font-medium text-zinc-500 uppercase">
                           Max Days
                         </label>
                         <input
@@ -549,12 +540,12 @@ export function RfpInboxClient({
                           onChange={(e) =>
                             updateLaneRow(idx, { maxTransitDays: e.target.value })
                           }
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs tabular-nums"
+                          className="h-7 w-full rounded-sm border border-border/70 bg-white px-2 text-xs tabular-nums"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">
-                          Shipper Email Request Text
+                        <label className="mb-1 block text-[10px] font-medium text-zinc-500 uppercase">
+                          Shipper Email Text
                         </label>
                         <input
                           type="text"
@@ -564,7 +555,7 @@ export function RfpInboxClient({
                             updateLaneRow(idx, { rawEmail: e.target.value })
                           }
                           data-testid={`custom-lane-email-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2.5 py-1 text-xs"
+                          className="h-7 w-full rounded-sm border border-border/70 bg-white px-2.5 text-xs"
                         />
                       </div>
                       <div className="flex items-end">
@@ -572,7 +563,7 @@ export function RfpInboxClient({
                           <button
                             type="button"
                             onClick={() => removeLaneRow(idx)}
-                            className="rounded p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-700"
+                            className="rounded-sm p-1 text-zinc-400 hover:bg-rose-50 hover:text-rose-700"
                             aria-label="Remove lane row"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -583,21 +574,21 @@ export function RfpInboxClient({
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2.5">
                   <button
                     type="button"
                     onClick={addLaneRow}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    className="inline-flex h-8 items-center gap-1 rounded-sm border border-border/70 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    Add Lane Row
+                    Add Lane
                   </button>
 
                   <button
                     type="submit"
                     disabled={busy}
                     data-testid="submit-custom-rfp"
-                    className="rounded-lg bg-[#1E3A5F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#162C49] disabled:opacity-50"
+                    className="h-8 rounded-sm bg-zinc-900 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
                   >
                     {busy ? "Running Intake & Routing..." : "Run Intake & Routing"}
                   </button>
@@ -606,88 +597,88 @@ export function RfpInboxClient({
             )}
 
             {createTab === "xlsx" && (
-              <form onSubmit={handleUploadXlsx} className="space-y-4">
-                <p className="text-xs text-slate-600">
-                  Upload an Excel workbook containing a <code className="font-mono">Shipper RFP</code> worksheet (and optional <code className="font-mono">Transit Table</code>). If no Transit Table is present, the active 20-airport flight network is used.
+              <form onSubmit={handleUploadXlsx} className="space-y-3.5">
+                <p className="text-xs text-zinc-500">
+                  Upload a workbook with a <code className="font-mono">Shipper RFP</code> sheet (and optional <code className="font-mono">Transit Table</code>). If omitted, the built-in 20-airport network applies.
                 </p>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                   <input
                     type="text"
                     placeholder="Optional RFP Title override"
                     value={xlsxTitle}
                     onChange={(e) => setXlsxTitle(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs"
+                    className="h-8 rounded-sm border border-border/70 px-2.5 text-xs"
                   />
                   <input
                     type="text"
                     placeholder="Optional Customer Contact"
                     value={xlsxCustomerName}
                     onChange={(e) => setXlsxCustomerName(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs"
+                    className="h-8 rounded-sm border border-border/70 px-2.5 text-xs"
                   />
                   <input
                     type="email"
                     placeholder="Optional Customer Email"
                     value={xlsxCustomerEmail}
                     onChange={(e) => setXlsxCustomerEmail(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs"
+                    className="h-8 rounded-sm border border-border/70 px-2.5 text-xs"
                   />
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-dashed border-border bg-zinc-50/70 px-4 py-3.5">
                   <input
                     type="file"
                     accept=".xlsx"
                     onChange={(e) => setXlsxFile(e.target.files?.[0] ?? null)}
                     data-testid="xlsx-file-input"
-                    className="text-xs text-slate-700 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-white file:px-3 file:py-1 file:text-xs file:font-semibold file:text-slate-700"
+                    className="text-xs text-zinc-700 file:mr-3 file:rounded-sm file:border file:border-border/70 file:bg-white file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-zinc-700"
                   />
                   <button
                     type="submit"
                     disabled={busy || !xlsxFile}
-                    className="rounded-lg bg-[#1E3A5F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#162C49] disabled:opacity-45"
+                    className="h-8 rounded-sm bg-zinc-900 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-45"
                   >
-                    {busy ? "Importing Workbook..." : "Upload & Assess"}
+                    {busy ? "Importing..." : "Upload & Assess"}
                   </button>
                 </div>
               </form>
             )}
 
             {createTab === "preset" && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <FileSpreadsheet className="h-4 w-4 text-[#1E3A5F]" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-md border border-border/70 bg-zinc-50/60 p-3.5">
+                  <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-900">
+                    <FileSpreadsheet className="h-4 w-4 text-zinc-700" />
                     <span>Showcase Subset (10 Lanes)</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Loads 10 real lanes from <code className="font-mono">Air_Freight_RFP_Mock_Data.xlsx</code> covering all 5 status buckets and multi-option trade-offs.
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Loads 10 lanes from <code className="font-mono">Air_Freight_RFP_Mock_Data.xlsx</code> covering all 5 status buckets.
                   </p>
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => handleCreatePreset("showcase")}
-                    className="mt-3 rounded-lg bg-[#1E3A5F] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#162C49] disabled:opacity-50"
+                    className="mt-3 h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
                   >
                     Create 10-Lane Showcase RFP
                   </button>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <FileSpreadsheet className="h-4 w-4 text-slate-700" />
-                    <span>Full Mock Workbook (100 Lanes)</span>
+                <div className="rounded-md border border-border/70 bg-zinc-50/60 p-3.5">
+                  <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-900">
+                    <FileSpreadsheet className="h-4 w-4 text-zinc-700" />
+                    <span>Full Workbook (100 Lanes)</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Runs intake & deterministic Dijkstra routing across all 100 lanes (4,008.4 tons) in the brief&apos;s workbook.
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Runs intake and constrained routing across all 100 lanes (4,008.4 tons) in the reference workbook.
                   </p>
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => handleCreatePreset("full100")}
                     data-testid="create-full100-preset"
-                    className="mt-3 rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 hover:bg-slate-100 disabled:opacity-50"
+                    className="mt-3 h-7 rounded-sm border border-border bg-white px-3 text-xs font-medium text-zinc-900 hover:bg-zinc-100 disabled:opacity-50"
                   >
                     Load All 100 Lanes
                   </button>

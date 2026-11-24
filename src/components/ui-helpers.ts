@@ -1,7 +1,7 @@
 import type { LaneStatus, ServiceType } from "../domain/types";
 
 export const SERVICE_SHORT_LABELS: Record<ServiceType, string> = {
-  TEMP_CONTROLLED: "Temp 2–8°C",
+  TEMP_CONTROLLED: "Temp 2-8C",
   DANGEROUS_GOODS: "DG",
   HIGH_VALUE_SECURITY: "High-Value",
   FRAGILE: "Fragile",
@@ -22,23 +22,23 @@ export const LANE_STATUS_META: Record<
 > = {
   FULLY_SERVABLE: {
     label: "Fully Servable",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-emerald-50/80 text-emerald-700 border-emerald-200/80",
   },
   COMPLIANT_BUT_LATE: {
     label: "Compliant (Late)",
-    badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
+    badgeClass: "bg-amber-50/80 text-amber-800 border-amber-200/80",
   },
   ON_TIME_BUT_MISSING_SERVICES: {
-    label: "On-Time (Missing Services)",
-    badgeClass: "bg-orange-50 text-orange-800 border-orange-200",
+    label: "On-Time (Partial)",
+    badgeClass: "bg-amber-50/60 text-amber-800 border-amber-200/70",
   },
   NO_ROUTE_IN_TIME: {
     label: "No Route in Time",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-rose-50/80 text-rose-700 border-rose-200/80",
   },
   UNREACHABLE: {
     label: "Unreachable",
-    badgeClass: "bg-slate-100 text-slate-700 border-slate-300",
+    badgeClass: "bg-zinc-100 text-zinc-600 border-border/70",
   },
 };
 
@@ -48,31 +48,31 @@ export const DISPOSITION_META: Record<
 > = {
   QUOTE_COMPLIANT: {
     label: "Quote Compliant",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-emerald-50/80 text-emerald-700 border-emerald-200/80",
   },
   QUOTE_COMPLIANT_LATE: {
     label: "Quote Compliant (Late)",
-    badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
+    badgeClass: "bg-amber-50/80 text-amber-800 border-amber-200/80",
   },
   QUOTE_PARTIAL_ON_TIME: {
     label: "Quote On-Time (Partial)",
-    badgeClass: "bg-sky-50 text-sky-800 border-sky-200",
+    badgeClass: "bg-zinc-100 text-zinc-800 border-border/70",
   },
   DECLINE: {
     label: "Declined",
-    badgeClass: "bg-slate-100 text-slate-600 border-slate-300",
+    badgeClass: "bg-zinc-100 text-zinc-500 border-border/70",
   },
   PENDING_REVIEW: {
-    label: "Pending Decision",
-    badgeClass: "bg-amber-100 text-amber-900 border-amber-300",
+    label: "Pending Review",
+    badgeClass: "bg-amber-50 text-amber-800 border-amber-300/80",
   },
   ACCEPTED: {
     label: "Accepted",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-300/80",
   },
   CUSTOMER_DECLINED: {
     label: "Customer Declined",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-rose-50/80 text-rose-700 border-rose-200/80",
   },
 };
 
@@ -85,85 +85,85 @@ export function getRfpStatusBadge(status: string): {
     case "INTAKE":
       return {
         label: "Intake",
-        badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        badgeClass: "bg-zinc-100 text-zinc-700 border-border/70",
         isWaiting: false,
       };
     case "ROUTING":
       return {
-        label: "Routing Complete",
-        badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        label: "Routing Ready",
+        badgeClass: "bg-emerald-50/80 text-emerald-700 border-emerald-200/80",
         isWaiting: false,
       };
     case "AWAITING_REQUIREMENT_CONFIRMATION":
       return {
-        label: "Awaiting Requirement / Route Review",
-        badgeClass: "bg-amber-50 text-amber-800 border-amber-300",
+        label: "Needs Route Review",
+        badgeClass: "bg-amber-50/90 text-amber-800 border-amber-300/80",
         isWaiting: true,
       };
     case "PRICING_REQUESTED":
       return {
         label: "Pricing Requested",
-        badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        badgeClass: "bg-zinc-100 text-zinc-700 border-border/70",
         isWaiting: false,
       };
     case "PRICING_RECEIVED":
       return {
         label: "Pricing Validated",
-        badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        badgeClass: "bg-emerald-50/80 text-emerald-700 border-emerald-200/80",
         isWaiting: false,
       };
     case "AWAITING_PRICING_FIXES":
       return {
-        label: "Awaiting Pricing Fixes",
-        badgeClass: "bg-amber-50 text-amber-800 border-amber-300",
+        label: "Pricing Fixes Open",
+        badgeClass: "bg-amber-50/90 text-amber-800 border-amber-300/80",
         isWaiting: true,
       };
     case "QUOTE_DRAFTED":
       return {
         label: "Quote Drafted",
-        badgeClass: "bg-sky-50 text-sky-800 border-sky-200",
+        badgeClass: "bg-zinc-100 text-zinc-800 border-border/70",
         isWaiting: false,
       };
     case "AWAITING_APPROVAL":
       return {
-        label: "Awaiting Approval",
-        badgeClass: "bg-amber-50 text-amber-800 border-amber-300",
+        label: "Pending Approval",
+        badgeClass: "bg-amber-50/90 text-amber-800 border-amber-300/80",
         isWaiting: true,
       };
     case "SENT":
       return {
         label: "Quote Sent",
-        badgeClass: "bg-sky-50 text-sky-800 border-sky-200",
+        badgeClass: "bg-zinc-100 text-zinc-800 border-border/70",
         isWaiting: false,
       };
     case "CUSTOMER_REPLIED":
       return {
         label: "Customer Replied",
-        badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        badgeClass: "bg-zinc-100 text-zinc-700 border-border/70",
         isWaiting: false,
       };
     case "WON":
       return {
-        label: "Won & Booked",
-        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+        label: "Won",
+        badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-300/80",
         isWaiting: false,
       };
     case "LOST":
       return {
         label: "Closed Lost",
-        badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+        badgeClass: "bg-rose-50/80 text-rose-700 border-rose-200/80",
         isWaiting: false,
       };
     case "NEEDS_FOLLOW_UP":
       return {
         label: "Needs Follow-Up",
-        badgeClass: "bg-amber-50 text-amber-800 border-amber-300",
+        badgeClass: "bg-amber-50/90 text-amber-800 border-amber-300/80",
         isWaiting: true,
       };
     default:
       return {
         label: status,
-        badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
+        badgeClass: "bg-zinc-100 text-zinc-700 border-border/70",
         isWaiting: false,
       };
   }

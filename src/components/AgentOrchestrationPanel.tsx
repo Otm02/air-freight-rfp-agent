@@ -36,28 +36,28 @@ function getModeStyle(ev: AgentEventView): {
   ) {
     return {
       label: ev.status === "WAITING_FOR_HUMAN" ? "Waiting for Human" : "Human Gate",
-      pillClass: "bg-amber-50 text-amber-900 border-amber-300",
+      pillClass: "bg-amber-50/90 text-amber-900 border-amber-300/80",
       barClass: "border-l-amber-500",
     };
   }
   if (ev.executionMode === "LLM") {
     return {
-      label: "LLM Call",
-      pillClass: "bg-indigo-50 text-indigo-800 border-indigo-200",
-      barClass: "border-l-indigo-500",
+      label: "LLM",
+      pillClass: "bg-zinc-100 text-zinc-800 border-border/70",
+      barClass: "border-l-zinc-600",
     };
   }
   if (ev.executionMode === "DETERMINISTIC") {
     return {
       label: "Deterministic",
-      pillClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      pillClass: "bg-emerald-50/80 text-emerald-800 border-emerald-200/80",
       barClass: "border-l-emerald-500",
     };
   }
   return {
-    label: "State Machine",
-    pillClass: "bg-slate-100 text-slate-700 border-slate-200",
-    barClass: "border-l-slate-400",
+    label: "State",
+    pillClass: "bg-zinc-100 text-zinc-700 border-border/70",
+    barClass: "border-l-zinc-400",
   };
 }
 
@@ -85,7 +85,7 @@ export function AgentOrchestrationPanel({
         const parsed = JSON.parse(msg.data) as AgentEventView;
         onStreamEvent(parsed);
       } catch {
-        // Ignore malformed frame
+        // Ignore malformed SSE frame
       }
     };
 
@@ -123,7 +123,6 @@ export function AgentOrchestrationPanel({
     setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Show main progression path plus matching terminal node
   const graphStages = PIPELINE_STAGES.filter((s) => {
     if (s.state === "LOST" && currentStatus !== "LOST") return false;
     if (s.state === "NEEDS_FOLLOW_UP" && currentStatus !== "NEEDS_FOLLOW_UP")
@@ -140,52 +139,48 @@ export function AgentOrchestrationPanel({
   return (
     <aside
       data-testid="agent-orchestration-panel"
-      className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-2xs lg:sticky lg:top-20 lg:max-h-[calc(100vh-6.5rem)]"
+      className="flex flex-col rounded-md border border-border/70 bg-white shadow-xs lg:sticky lg:top-16 lg:max-h-[calc(100vh-5rem)]"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-[#1E3A5F]" />
-          <h2 className="text-sm font-semibold text-slate-900">
-            Agent Orchestration
+      <div className="flex items-center justify-between border-b border-border/60 px-3.5 py-2.5">
+        <div className="flex items-center gap-1.5">
+          <Activity className="h-3.5 w-3.5 text-zinc-700" />
+          <h2 className="text-[13px] font-medium text-zinc-900">
+            Activity Log
           </h2>
         </div>
 
-        <div className="flex items-center gap-2">
+        <span
+          data-testid="sse-connection-pill"
+          className={`inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-px text-[11px] font-medium ${
+            sseConnected
+              ? "border-emerald-200/80 bg-emerald-50/80 text-emerald-700"
+              : "border-border/70 bg-zinc-50 text-zinc-500"
+          }`}
+        >
           <span
-            data-testid="sse-connection-pill"
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium ${
-              sseConnected
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-slate-200 bg-slate-50 text-slate-500"
+            className={`h-1.5 w-1.5 rounded-full ${
+              sseConnected ? "bg-emerald-600" : "bg-zinc-400"
             }`}
-          >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                sseConnected ? "bg-emerald-600" : "bg-slate-400"
-              }`}
-            />
-            {sseConnected ? "Live SSE" : "Connecting"}
-          </span>
-        </div>
+          />
+          {sseConnected ? "Live SSE" : "Connecting"}
+        </span>
       </div>
 
-      {/* Pipeline State Graph */}
       <div
-        className="border-b border-slate-200 bg-slate-50/70 px-4 py-3"
+        className="border-b border-border/60 bg-zinc-50/60 px-3.5 py-2.5"
         data-testid="pipeline-state-graph"
       >
-        <div className="mb-2 flex items-center justify-between text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
-          <span>RFP Pipeline Graph</span>
+        <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+          <span>Pipeline</span>
           {waitingHuman && (
-            <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+            <span className="inline-flex items-center gap-1 rounded-sm bg-amber-100/80 px-1.5 py-px text-[10px] font-medium text-amber-900">
               <PauseCircle className="h-3 w-3" />
               WAITING FOR HUMAN
             </span>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1">
           {graphStages.map((stage, idx) => {
             const stageMasterIdx = PIPELINE_STAGES.findIndex(
               (s) => s.state === stage.state,
@@ -203,24 +198,24 @@ export function AgentOrchestrationPanel({
                 <span
                   data-testid={`pipeline-node-${stage.state}`}
                   data-active={isCurrent ? "true" : "false"}
-                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold transition ${
+                  className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-px text-[10px] font-medium transition-colors ${
                     isCurrent && stage.isHumanGate
-                      ? "border-amber-400 bg-amber-100 text-amber-950 ring-2 ring-amber-300/70"
+                      ? "border-amber-400 bg-amber-50 text-amber-950 ring-1 ring-amber-400/50"
                       : isCurrent && stage.state === "WON"
-                        ? "border-emerald-400 bg-emerald-100 text-emerald-900 ring-2 ring-emerald-300/70"
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-400/50"
                         : isCurrent && stage.state === "LOST"
-                          ? "border-rose-400 bg-rose-100 text-rose-900 ring-2 ring-rose-300/70"
+                          ? "border-rose-400 bg-rose-50 text-rose-900 ring-1 ring-rose-400/50"
                           : isCurrent
-                            ? "border-[#1E3A5F] bg-[#1E3A5F] text-white ring-2 ring-sky-200"
+                            ? "border-zinc-900 bg-zinc-900 text-white ring-1 ring-zinc-900/20"
                             : isDone
-                              ? "border-emerald-200 bg-emerald-50/80 text-emerald-700"
-                              : "border-slate-200 bg-white text-slate-400"
+                              ? "border-emerald-200/80 bg-emerald-50/60 text-emerald-700"
+                              : "border-border/60 bg-white text-zinc-400"
                   }`}
                 >
                   {stage.shortLabel}
                 </span>
                 {idx < graphStages.length - 1 && (
-                  <span className="text-[10px] text-slate-300">→</span>
+                  <span className="text-[10px] text-zinc-300">/</span>
                 )}
               </div>
             );
@@ -228,16 +223,15 @@ export function AgentOrchestrationPanel({
         </div>
       </div>
 
-      {/* Filter Legend Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2 text-[11px]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3.5 py-2 text-[11px]">
         <div className="flex flex-wrap items-center gap-1">
           <button
             type="button"
             onClick={() => setModeFilter("ALL")}
-            className={`rounded px-2 py-0.5 font-medium ${
+            className={`rounded-sm px-2 py-0.5 font-medium ${
               modeFilter === "ALL"
-                ? "bg-slate-800 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-zinc-900 text-white"
+                : "text-zinc-600 hover:bg-zinc-100"
             }`}
           >
             All ({events.length})
@@ -245,22 +239,22 @@ export function AgentOrchestrationPanel({
           <button
             type="button"
             onClick={() => setModeFilter("DETERMINISTIC")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium ${
+            className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-medium ${
               modeFilter === "DETERMINISTIC"
                 ? "bg-emerald-700 text-white"
                 : "text-emerald-700 hover:bg-emerald-50"
             }`}
           >
             <ShieldCheck className="h-3 w-3" />
-            Deterministic
+            Code
           </button>
           <button
             type="button"
             onClick={() => setModeFilter("LLM")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium ${
+            className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-medium ${
               modeFilter === "LLM"
-                ? "bg-indigo-700 text-white"
-                : "text-indigo-700 hover:bg-indigo-50"
+                ? "bg-zinc-900 text-white"
+                : "text-zinc-700 hover:bg-zinc-100"
             }`}
           >
             <Sparkles className="h-3 w-3" />
@@ -269,7 +263,7 @@ export function AgentOrchestrationPanel({
           <button
             type="button"
             onClick={() => setModeFilter("HUMAN_GATE")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium ${
+            className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-medium ${
               modeFilter === "HUMAN_GATE"
                 ? "bg-amber-700 text-white"
                 : "text-amber-800 hover:bg-amber-50"
@@ -283,17 +277,16 @@ export function AgentOrchestrationPanel({
         <button
           type="button"
           onClick={() => setNewestFirst((v) => !v)}
-          className="text-[11px] font-medium text-slate-500 hover:text-slate-900"
+          className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900"
         >
-          {newestFirst ? "Newest first ↓" : "Oldest first ↑"}
+          {newestFirst ? "Newest first" : "Oldest first"}
         </button>
       </div>
 
-      {/* Live Timeline */}
-      <div className="flex-1 divide-y divide-slate-100 overflow-y-auto p-3">
+      <div className="flex-1 space-y-1.5 overflow-y-auto p-2.5">
         {orderedEvents.length === 0 ? (
-          <p className="py-8 text-center text-xs text-slate-400">
-            No matching orchestration events yet.
+          <p className="py-8 text-center text-xs text-zinc-400">
+            No matching events recorded.
           </p>
         ) : (
           orderedEvents.map((ev) => {
@@ -303,30 +296,30 @@ export function AgentOrchestrationPanel({
             return (
               <div
                 key={ev.id}
-                className={`mb-2 rounded-lg border border-slate-200 border-l-4 ${style.barClass} bg-white p-2.5 text-xs`}
+                className={`rounded-sm border border-border/70 border-l-2 ${style.barClass} bg-white p-2 text-xs`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-medium text-zinc-900">
                       {ev.agentName}
                     </span>
                     <span
-                      className={`rounded border px-1.5 py-0.2 text-[10px] font-semibold ${style.pillClass}`}
+                      className={`rounded-sm border px-1.5 py-px text-[10px] font-medium ${style.pillClass}`}
                     >
                       {style.label}
                     </span>
-                    <span className="font-mono text-[10px] text-slate-500">
+                    <span className="font-mono text-[10px] text-zinc-500">
                       {ev.step}
                     </span>
                   </div>
-                  <span className="shrink-0 font-mono text-[10px] text-slate-400 tabular-nums">
+                  <span className="shrink-0 font-mono text-[10px] text-zinc-400 tabular-nums">
                     {ev.latencyMs}ms
                   </span>
                 </div>
 
-                <p className="mt-1 leading-snug text-slate-700">{ev.summary}</p>
+                <p className="mt-1 leading-snug text-zinc-700">{ev.summary}</p>
 
-                <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400">
+                <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-400">
                   <span className="inline-flex items-center gap-1">
                     <Cpu className="h-3 w-3" />
                     {ev.provider}/{ev.model}
@@ -342,7 +335,7 @@ export function AgentOrchestrationPanel({
                   <button
                     type="button"
                     onClick={() => toggleExpanded(ev.id)}
-                    className="inline-flex items-center gap-0.5 font-medium text-slate-600 hover:text-slate-900"
+                    className="inline-flex items-center gap-0.5 font-medium text-zinc-600 hover:text-zinc-900"
                   >
                     {expanded ? (
                       <ChevronDown className="h-3 w-3" />
@@ -354,24 +347,26 @@ export function AgentOrchestrationPanel({
                 </div>
 
                 {expanded && (
-                  <div className="mt-2 space-y-1.5 rounded border border-slate-200 bg-slate-50 p-2 font-mono text-[10px] text-slate-700">
+                  <div className="mt-2 space-y-1 rounded-sm border border-border/60 bg-zinc-50 p-2 font-mono text-[10px] text-zinc-700">
                     {ev.fromState || ev.toState ? (
                       <div>
-                        <strong>Transition:</strong> {ev.fromState ?? "—"} →{" "}
-                        {ev.toState ?? "—"}
+                        <span className="font-medium">Transition:</span>{" "}
+                        {ev.fromState ?? "-"} -&gt; {ev.toState ?? "-"}
                       </div>
                     ) : null}
                     {ev.inputSummary && (
                       <div>
-                        <strong>Input:</strong> {ev.inputSummary}
+                        <span className="font-medium">Input:</span>{" "}
+                        {ev.inputSummary}
                       </div>
                     )}
                     {ev.outputSummary && (
                       <div>
-                        <strong>Output:</strong> {ev.outputSummary}
+                        <span className="font-medium">Output:</span>{" "}
+                        {ev.outputSummary}
                       </div>
                     )}
-                    <pre className="max-h-40 overflow-x-auto whitespace-pre-wrap text-[10px] text-slate-600">
+                    <pre className="max-h-40 overflow-x-auto whitespace-pre-wrap text-[10px] text-zinc-600">
                       {JSON.stringify(ev.payload, null, 2)}
                     </pre>
                   </div>

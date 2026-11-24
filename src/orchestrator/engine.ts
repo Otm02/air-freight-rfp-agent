@@ -1790,7 +1790,7 @@ export async function draftQuote(
       executionMode: "HUMAN_GATE",
       status: "WAITING_FOR_HUMAN",
       inputSummary: `Proposal #${draft.proposalId} (v${draft.version})`,
-      outputSummary: "Requires RFP Team sign-off to unlock Send",
+      outputSummary: "Requires RFP Team sign-off before sending",
     },
   );
 
