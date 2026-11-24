@@ -24,6 +24,7 @@
     "@libsql/client": "^0.14.0",
     "ai": "^4.3.16",
     "drizzle-orm": "^0.41.0",
+    "geist": "^1.9.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.511.0",
     "next": "^15.5.29",

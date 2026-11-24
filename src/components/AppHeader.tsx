@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, AlertCircle, ArrowLeft, Cpu, Plane } from "lucide-react";
+import { Activity, Plane } from "lucide-react";
+import { StatusDot, StatusMark } from "./ui";
 import { getRfpStatusBadge } from "./ui-helpers";
 
 interface AppHeaderProps {
@@ -42,56 +43,56 @@ export function AppHeader({
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/60 bg-white">
-      <div className="mx-auto flex h-12 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
+    <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white">
+      <div className="flex h-12 items-center justify-between gap-4 px-6">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-sm py-1 pr-1 text-zinc-900"
+            className="flex items-center gap-2 rounded-sm text-zinc-900"
           >
             <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-zinc-900 text-white">
               <Plane className="h-3 w-3" />
             </span>
-            <span className="text-[13px] font-medium tracking-tight text-zinc-900">
+            <span className="text-sm font-semibold tracking-tight">
               AeroBid
             </span>
           </Link>
 
           {currentRfp && (
             <>
-              <span className="text-zinc-300">/</span>
+              <span className="text-zinc-300" aria-hidden="true">
+                /
+              </span>
               <Link
                 href="/"
-                className="inline-flex items-center gap-1 text-[13px] text-zinc-500 hover:text-zinc-900"
+                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
               >
-                <ArrowLeft className="h-3 w-3" />
                 Inbox
               </Link>
-              <span className="text-zinc-300">/</span>
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate text-[13px] font-medium text-zinc-900">
+              <span className="text-zinc-300" aria-hidden="true">
+                /
+              </span>
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="truncate text-sm font-medium text-zinc-900">
                   {currentRfp.title}
                 </span>
                 {statusMeta && (
-                  <span
-                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-sm border px-1.5 py-px text-[11px] font-medium ${statusMeta.badgeClass}`}
-                  >
-                    {statusMeta.isWaiting && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    )}
-                    {statusMeta.label}
-                  </span>
+                  <StatusMark
+                    tone={statusMeta.tone}
+                    label={statusMeta.label}
+                    className="shrink-0"
+                  />
                 )}
               </div>
             </>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleToggleLlmMode}
-            className="inline-flex h-7 items-center gap-1.5 rounded-sm border border-border/70 bg-white px-2 text-xs text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex h-7 items-center gap-2 rounded-sm border border-zinc-200 bg-white px-2.5 text-xs text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
             title={
               isOfflineActive
                 ? "Running on the rule engine. Click to use the configured LLM provider."
@@ -99,10 +100,7 @@ export function AppHeader({
             }
             data-testid="llm-mode-badge"
           >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${isOfflineActive ? "bg-zinc-400" : "bg-emerald-500"}`}
-            />
-            <Cpu className="h-3 w-3 text-zinc-400" />
+            <StatusDot tone={isOfflineActive ? "muted" : "ok"} />
             <span>{activeModelLabel}</span>
           </button>
 
@@ -110,21 +108,13 @@ export function AppHeader({
             type="button"
             onClick={onHumanTasksClick}
             data-testid="header-human-tasks-badge"
-            className={`inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-xs font-medium transition-colors ${
-              openTasksCount > 0
-                ? "border-amber-300/80 bg-amber-50 text-amber-900 hover:bg-amber-100/70"
-                : "border-border/70 bg-white text-zinc-600 hover:bg-zinc-50"
-            }`}
+            className="inline-flex h-7 items-center gap-2 rounded-sm border border-zinc-200 bg-white px-2.5 text-xs text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
           >
-            <AlertCircle
-              className={`h-3 w-3 ${openTasksCount > 0 ? "text-amber-600" : "text-zinc-400"}`}
-            />
+            <StatusDot tone={openTasksCount > 0 ? "warn" : "muted"} />
             <span>Needs review</span>
             <span
-              className={`inline-flex min-w-4 items-center justify-center rounded-sm px-1 text-[11px] font-medium tabular-nums ${
-                openTasksCount > 0
-                  ? "bg-amber-600 text-white"
-                  : "bg-zinc-100 text-zinc-600"
+              className={`min-w-4 border-l border-zinc-200 pl-2 text-right font-medium tabular-nums ${
+                openTasksCount > 0 ? "text-zinc-900" : "text-zinc-400"
               }`}
             >
               {openTasksCount}
@@ -136,10 +126,11 @@ export function AppHeader({
               type="button"
               onClick={onToggleOrchestration}
               data-testid="toggle-orchestration-panel"
-              className={`inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-xs transition-colors ${
+              aria-pressed={orchestrationOpen}
+              className={`inline-flex h-7 items-center gap-1.5 rounded-sm border px-2.5 text-xs transition-colors ${
                 orchestrationOpen
-                  ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-border/70 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  ? "border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700"
+                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900"
               }`}
             >
               <Activity className="h-3 w-3" />
