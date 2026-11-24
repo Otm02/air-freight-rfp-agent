@@ -5,6 +5,7 @@ import {
   getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
+  parseJsonBody,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { approveAndSendQuote, getRfpWorkspace } from "@/orchestrator";
@@ -27,7 +28,7 @@ export async function POST(
     const { id } = await context.params;
     const rfpId = parsePositiveIntId(id, "rfpId");
 
-    const body: unknown = await request.json();
+    const body = await parseJsonBody(request);
     const parsed = ApproveSendSchema.safeParse(body);
     if (!parsed.success) {
       throw new HttpBadRequestError(

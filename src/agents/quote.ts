@@ -508,6 +508,35 @@ function renderPlainTextQuoteSection(
   return lines.join("\n");
 }
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Verifies LLM-generated framing prose contains zero fabricated prices,
+ * dollar amounts, unit rates, tonnages, or transit day numbers.
+ * Allowed occurrences of customerName, rfpTitle, signature, or "vN" tags are
+ * stripped before scanning so titles like "100-Lane Mock RFP" do not false-trigger.
+ */
+export function proseContainsProhibitedNumbers(
+  prose: QuoteProse,
+  allowedTokens: readonly string[] = [],
+): string | null {
+  let scrubbed = `${prose.greeting}\n${prose.summary}\n${prose.closing}`;
+  for (const token of allowedTokens) {
+    const cleaned = token.trim();
+    if (cleaned.length > 0) {
+      scrubbed = scrubbed.replace(new RegExp(escapeRegExp(cleaned), "gi"), " ");
+    }
+  }
+  scrubbed = scrubbed.replace(/\bv\d+\b/gi, " ");
+
+  const prohibited = scrubbed.match(
+    /\$\s*\d[\d,]*(?:\.\d+)?|\bUSD\b|\/\s*(?:t|ton|kg)\b|\bper\s+(?:ton|kg)\b|\b\d+(?:,\d{3})*(?:\.\d+)?\b/i,
+  );
+  return prohibited ? prohibited[0] : null;
+}
+
 function buildOfflineQuoteProse(
   customerName: string,
   rfpTitle: string,
@@ -575,7 +604,38 @@ export async function draftCustomerQuote(
     offlineHandler: () => fallbackProse,
   });
 
-  const prose: QuoteProse = llmCall.ok ? llmCall.data : fallbackProse;
+  let prose: QuoteProse = llmCall.ok ? llmCall.data : fallbackProse;
+  if (llmCall.ok) {
+    const prohibitedMatch = proseContainsProhibitedNumbers(llmCall.data, [
+      options.rfpTitle,
+      options.customerName,
+      signature,
+    ]);
+    if (prohibitedMatch) {
+      prose = fallbackProse;
+      await options.db.insert(agentEvents).values({
+        rfpId: options.rfpId,
+        laneId: null,
+        agentName: "QuoteAgent",
+        eventType: "QUOTE_PROSE_SANITIZED",
+        provider: llmCall.provider,
+        model: llmCall.model,
+        latencyMs: llmCall.latencyMs,
+        inputTokens: llmCall.usage.inputTokens,
+        outputTokens: llmCall.usage.outputTokens,
+        totalTokens: llmCall.usage.totalTokens,
+        costUsd: llmCall.costUsd,
+        retryCount: llmCall.retriesUsed,
+        status: "WARNING",
+        summary: `Blocked numeric/currency token ("${prohibitedMatch}") from LLM quote prose and reverted to deterministic framing.`,
+        payloadJson: JSON.stringify({
+          prohibitedMatch,
+          rejectedProse: llmCall.data,
+        }),
+        createdAt: now,
+      });
+    }
+  }
 
   const markdownTable = renderMarkdownQuoteSection(
     options.rfpTitle,

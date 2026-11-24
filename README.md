@@ -154,7 +154,7 @@ Every commercial commitment, SLA trade-off, or uncertain model output transition
 ### Intake Evaluation (`npm run eval:intake -- --mode offline` -> `out/eval_intake.md`)
 - **Exact-Match Rate vs `data/gold_requirements.json`:** **100 / 100 (100.00%)**
 - **Micro Precision / Recall / F1:** **100.00% / 100.00% / 100.00%** across all 5 canonical services and `15/15` standard cargo controls
-- **Cost and Runtime (Offline Mode):** **\$0.000000** token cost, **`0` human-task false alarms**, **50 ms** runtime *(Live Gemini/OpenAI eval runs with `--mode auto` when a funded key is set; live retry, schema validation, timeout, RPM cap, and cost cap logic is unit-tested against stubbed transports.)*
+- **Cost and Runtime (Offline Mode):** **\$0.000000** token cost, **`0` human-task false alarms**, **66 ms** runtime *(Live Gemini/OpenAI eval runs with `--mode auto` when a funded key is set; live retry, schema validation, timeout, RPM cap, and cost cap logic is unit-tested against stubbed transports.)*
 
 ### Pricing Parser Evaluation (`npm run eval:pricing` -> `out/eval_pricing.md`)
 Measured across **5 batches / 40 lane-quote instances** against hidden deterministic true prices:
@@ -169,11 +169,12 @@ Measured across **5 batches / 40 lane-quote instances** against hidden determini
 
 - Modeling decisions and edge-case rules: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md)
 - Architecture, schema, and pricing formula: [`docs/DESIGN.md`](docs/DESIGN.md)
+- Pre-interview engineering review and fixes: [`docs/REVIEW.md`](docs/REVIEW.md)
 - CI checks (`.github/workflows/ci.yml`):
   - `npm run check:secrets`: scans tracked files and full git history for leaked `.env*` files, API keys, and PEM keys
   - `npm run lint`: ESLint (`eslint-config-next/core-web-vitals` + `typescript`)
   - `npm run typecheck`: `tsc --noEmit`
-  - `npm test`: `tsx --test "tests/**/*.test.ts"` covering domain parity, all agents, rate/cost caps, orchestrator state machine, and all 8 required edge cases
+  - `npm test`: `tsx --test "tests/**/*.test.ts"` running `64` tests across `17` suites covering domain parity, all agents, rate/cost caps, orchestrator state machine, and all 8 required edge cases (the Python `openpyxl` reference parity subtest runs automatically when `openpyxl` is installed and skips cleanly on JS-only environments)
   - `npm run eval`: offline intake + pricing evaluations
   - `npm run e2e`: Playwright Chromium test (`e2e/demo-rfp.spec.ts`) uploading `tests/fixtures/demo_upload_rfp.xlsx` and completing the full flow to `WON` and `.ics` download
 

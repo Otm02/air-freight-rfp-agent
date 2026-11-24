@@ -299,6 +299,46 @@ describe("Quote Agent, Human Approval Gate, RFC 5545 ICS & Deal Agent", () => {
     assert.equal(draftV2.totalValueUsd, 102000);
     assert.ok(draftV2.plainTextBody.includes("Dear Maya Lin,"));
     assert.ok(draftV2.plainTextBody.includes("$102,000.00"));
+
+    // Stub LLM attempting to smuggle fabricated $999/ton price into narrative prose is blocked
+    const leakyTransport: StructuredTransport = {
+      async generateStructured() {
+        return {
+          rawObject: {
+            greeting: "Dear Maya Lin,",
+            summary:
+              "We are delighted to offer a flat discount of $999/ton across 45 tons in 3 days.",
+            closing: "Best regards,\nAir Freight RFP Response Team",
+          },
+          usage: { inputTokens: 80, outputTokens: 25, totalTokens: 105 },
+        };
+      },
+    };
+    const leakyLlm = new LlmClient({
+      provider: "openai",
+      env: { OPENAI_API_KEY: "test-key" },
+      transport: leakyTransport,
+      db: handle.db,
+    });
+    const draftV3 = await draftCustomerQuote({
+      db: handle.db,
+      rfpId: ctx.rfpId,
+      customerName: "Maya Lin",
+      customerEmail: "maya.lin@shipper.example",
+      rfpTitle: "Q4 Pharma & Electronics Tender",
+      lanes: ctx.laneInputs,
+      llm: leakyLlm,
+    });
+    assert.equal(draftV3.markdownBody.includes("$999"), false);
+    assert.equal(draftV3.plainTextBody.includes("45 tons"), false);
+    assert.ok(draftV3.plainTextBody.includes("Below is our structured"));
+    assert.ok(draftV3.plainTextBody.includes("$102,000.00"));
+
+    const events = await handle.db
+      .select()
+      .from(agentEvents)
+      .where(eq(agentEvents.rfpId, ctx.rfpId));
+    assert.ok(events.some((e) => e.eventType === "QUOTE_PROSE_SANITIZED"));
   });
 
   it("enforces the hard human approval gate across open human_tasks, approval metadata, outbox, and optional SMTP", async () => {

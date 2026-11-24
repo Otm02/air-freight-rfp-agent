@@ -6,6 +6,8 @@ import {
   createPricingRequestEmail,
   draftCustomerQuote,
   handleCustomerReply,
+  MAX_SANE_PRICE_PER_TON_USD,
+  MIN_SANE_PRICE_PER_TON_USD,
   parsePricingReply,
   runIntakeForLane,
   sendCustomerQuote,
@@ -1057,11 +1059,14 @@ export async function decideLaneDisposition(
     alternatives[params.alternativeIndex]
   ) {
     selectedAirports = alternatives[params.alternativeIndex]!.route.airports;
-  } else if (params.disposition === "QUOTE_COMPLIANT_LATE" || params.disposition === "QUOTE_COMPLIANT") {
-    selectedAirports = bestCompliantAirports ?? currentChosenAirports ?? fastestAirports;
+  } else if (
+    params.disposition === "QUOTE_COMPLIANT_LATE" ||
+    params.disposition === "QUOTE_COMPLIANT"
+  ) {
+    selectedAirports = bestCompliantAirports;
     if (!selectedAirports) {
       throw new Error(
-        `Cannot apply ${params.disposition} to ${laneRow.laneCode}: no route exists on flight network.`,
+        `Cannot apply ${params.disposition} to ${laneRow.laneCode}: no compliant route fulfills all requested services.`,
       );
     }
   } else if (params.disposition === "QUOTE_PARTIAL_ON_TIME") {
@@ -1485,8 +1490,14 @@ export async function setManualLanePrice(
   laneId: number,
   params: { pricePerTonUsd: number; reviewer: string; note?: string },
 ): Promise<void> {
-  if (!Number.isFinite(params.pricePerTonUsd) || params.pricePerTonUsd <= 0) {
-    throw new Error("Manual pricePerTonUsd must be a positive number.");
+  if (
+    !Number.isFinite(params.pricePerTonUsd) ||
+    params.pricePerTonUsd < MIN_SANE_PRICE_PER_TON_USD ||
+    params.pricePerTonUsd > MAX_SANE_PRICE_PER_TON_USD
+  ) {
+    throw new Error(
+      `Manual pricePerTonUsd must be between $${MIN_SANE_PRICE_PER_TON_USD} and $${MAX_SANE_PRICE_PER_TON_USD}/t.`,
+    );
   }
 
   const [laneRow] = await db

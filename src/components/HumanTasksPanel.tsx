@@ -21,6 +21,8 @@ interface HumanTasksPanelProps {
   tasks: readonly HumanTaskView[];
   lanes: readonly LaneWorkspaceView[];
   proposal: ProposalView | null;
+  reviewerEmail: string;
+  onReviewerEmailChange: (value: string) => void;
   busy: boolean;
   onInspectLane: (laneId: number) => void;
   onConfirmRequirements: (
@@ -59,6 +61,8 @@ export function HumanTasksPanel({
   tasks,
   lanes,
   proposal,
+  reviewerEmail,
+  onReviewerEmailChange,
   busy,
   onInspectLane,
   onConfirmRequirements,
@@ -72,7 +76,6 @@ export function HumanTasksPanel({
   const [serviceDrafts, setServiceDrafts] = useState<
     Record<number, ServiceType[]>
   >({});
-  const [approverName, setApproverName] = useState("alice.rfp@carrier.example");
   const [followUpNotes, setFollowUpNotes] = useState<Record<number, string>>({});
 
   const laneById = new Map(lanes.map((l) => [l.id, l]));
@@ -339,18 +342,18 @@ export function HumanTasksPanel({
                         <div className="flex flex-wrap items-center gap-2">
                           <input
                             type="text"
-                            value={approverName}
-                            onChange={(e) => setApproverName(e.target.value)}
+                            value={reviewerEmail}
+                            onChange={(e) => onReviewerEmailChange(e.target.value)}
                             aria-label="Approver identifier"
                             className="h-7 w-52 rounded-sm border border-border/70 bg-white px-2.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-hidden"
                           />
                           <button
                             type="button"
-                            disabled={busy || !approverName.trim()}
+                            disabled={busy || !reviewerEmail.trim()}
                             onClick={() =>
                               onApproveAndSendQuote(
                                 proposal.id,
-                                approverName.trim(),
+                                reviewerEmail.trim(),
                               )
                             }
                             data-testid="approve-send-quote-btn"

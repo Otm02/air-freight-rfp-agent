@@ -5,6 +5,7 @@ import {
   getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
+  parseJsonBody,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import { getRfpWorkspace, resolveFollowUpTask } from "@/orchestrator";
@@ -27,7 +28,7 @@ export async function POST(
     const rfpId = parsePositiveIntId(id, "rfpId");
     const taskId = parsePositiveIntId(rawTaskId, "taskId");
 
-    const body: unknown = await request.json();
+    const body = await parseJsonBody(request);
     const parsed = ResolveTaskSchema.safeParse(body);
     if (!parsed.success) {
       throw new HttpBadRequestError(

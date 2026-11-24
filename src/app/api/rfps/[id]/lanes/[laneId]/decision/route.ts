@@ -6,6 +6,7 @@ import {
   getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
+  parseJsonBody,
   parsePositiveIntId,
 } from "@/lib/api-helpers";
 import {
@@ -48,7 +49,7 @@ export async function POST(
     const rfpId = parsePositiveIntId(id, "rfpId");
     const laneId = parsePositiveIntId(rawLaneId, "laneId");
 
-    const body: unknown = await request.json();
+    const body = await parseJsonBody(request);
     const parsed = LaneActionSchema.safeParse(body);
     if (!parsed.success) {
       throw new HttpBadRequestError(

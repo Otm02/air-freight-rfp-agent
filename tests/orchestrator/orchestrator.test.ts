@@ -239,4 +239,43 @@ describe("RFP Orchestrator state machine, SSE event bus & seeder", () => {
     assert.equal(snapLost?.rfp.status, "LOST");
     assert.equal(snapLost?.meeting, null);
   });
+
+  it("rejects out-of-range manual pricing and non-compliant QUOTE_COMPLIANT_LATE overrides", async () => {
+    const handle = await createDatabase(":memory:");
+    handles.push(handle);
+
+    const demoId = await ensureDemoSeeded(handle.db);
+    const snap = await getRfpWorkspace(handle.db, demoId, "offline");
+    assert.ok(snap);
+
+    const gruBog = snap.lanes.find((l) => l.laneCode === "GRU-BOG");
+    assert.ok(gruBog);
+
+    // GRU-BOG is ON_TIME_BUT_MISSING_SERVICES and has no compliant route -> must reject QUOTE_COMPLIANT_LATE
+    await assert.rejects(
+      decideLaneDisposition(handle.db, demoId, gruBog.id, {
+        disposition: "QUOTE_COMPLIANT_LATE",
+        reviewer: "alice.rfp@carrier.example",
+      }),
+      /no compliant route/i,
+    );
+
+    // Manual price sanity bounds [$500, $15,000]/t enforced cleanly
+    const mexCdg = snap.lanes.find((l) => l.laneCode === "MEX-CDG");
+    assert.ok(mexCdg);
+    await assert.rejects(
+      setManualLanePrice(handle.db, demoId, mexCdg.id, {
+        pricePerTonUsd: 50,
+        reviewer: "alice.rfp@carrier.example",
+      }),
+      /between \$500 and \$15000\/t/i,
+    );
+    await assert.rejects(
+      setManualLanePrice(handle.db, demoId, mexCdg.id, {
+        pricePerTonUsd: 50_000,
+        reviewer: "alice.rfp@carrier.example",
+      }),
+      /between \$500 and \$15000\/t/i,
+    );
+  });
 });

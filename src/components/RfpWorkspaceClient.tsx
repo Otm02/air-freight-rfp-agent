@@ -45,6 +45,7 @@ export function RfpWorkspaceClient({
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("lanes");
   const [selectedLaneId, setSelectedLaneId] = useState<number | null>(null);
   const [orchestrationOpen, setOrchestrationOpen] = useState(true);
+  const [reviewerEmail, setReviewerEmail] = useState("alice.rfp@carrier.example");
   const [busy, setBusy] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
@@ -99,7 +100,7 @@ export function RfpWorkspaceClient({
     await runMutation(`/api/rfps/${workspace.rfp.id}/lanes/${laneId}/decision`, {
       action: "confirm_requirements",
       requestedServices,
-      reviewer: "alice.rfp@carrier.example",
+      reviewer: reviewerEmail.trim() || "alice.rfp@carrier.example",
       note,
     });
   };
@@ -118,7 +119,7 @@ export function RfpWorkspaceClient({
       action: "route_decision",
       disposition,
       alternativeIndex,
-      reviewer: "alice.rfp@carrier.example",
+      reviewer: reviewerEmail.trim() || "alice.rfp@carrier.example",
       note,
     });
   };
@@ -141,7 +142,7 @@ export function RfpWorkspaceClient({
     await runMutation(`/api/rfps/${workspace.rfp.id}/pricing/manual`, {
       laneId,
       pricePerTonUsd,
-      reviewer: "alice.rfp@carrier.example",
+      reviewer: reviewerEmail.trim() || "alice.rfp@carrier.example",
       note,
     });
   };
@@ -156,7 +157,7 @@ export function RfpWorkspaceClient({
   ) => {
     await runMutation(`/api/rfps/${workspace.rfp.id}/quote/approve-send`, {
       proposalId,
-      approvedBy,
+      approvedBy: approvedBy.trim() || reviewerEmail.trim() || "alice.rfp@carrier.example",
     });
   };
 
@@ -177,7 +178,7 @@ export function RfpWorkspaceClient({
     await runMutation(
       `/api/rfps/${workspace.rfp.id}/tasks/${taskId}/resolve`,
       {
-        reviewer: "alice.rfp@carrier.example",
+        reviewer: reviewerEmail.trim() || "alice.rfp@carrier.example",
         responseNote,
         outcome,
       },
@@ -312,7 +313,7 @@ export function RfpWorkspaceClient({
                     type="button"
                     disabled={busy}
                     onClick={() =>
-                      handleApproveAndSend(proposal.id, "alice.rfp@carrier.example")
+                      handleApproveAndSend(proposal.id, reviewerEmail)
                     }
                     data-testid="action-approve-send-banner"
                     className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-emerald-700 px-3 text-xs font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
@@ -465,6 +466,8 @@ export function RfpWorkspaceClient({
                 tasks={workspace.humanTasks}
                 lanes={workspace.lanes}
                 proposal={proposal}
+                reviewerEmail={reviewerEmail}
+                onReviewerEmailChange={setReviewerEmail}
                 busy={busy}
                 onInspectLane={(laneId) => setSelectedLaneId(laneId)}
                 onConfirmRequirements={handleConfirmRequirements}

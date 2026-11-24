@@ -20,6 +20,14 @@ export function parsePositiveIntId(raw: string, label: string): number {
   return num;
 }
 
+export async function parseJsonBody(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    throw new HttpBadRequestError("Invalid JSON request body.", 400);
+  }
+}
+
 export function parseLlmMode(raw: unknown): LlmModeOverride | undefined {
   if (raw === "offline" || raw === "auto") {
     return raw;
@@ -50,6 +58,32 @@ export function getLlmModeFromRequest(
   return undefined;
 }
 
+function isInternalSystemError(err: unknown): boolean {
+  if (
+    err instanceof TypeError ||
+    err instanceof ReferenceError ||
+    err instanceof RangeError ||
+    err instanceof SyntaxError ||
+    err instanceof URIError
+  ) {
+    return true;
+  }
+  const code =
+    err && typeof err === "object" && "code" in err
+      ? String((err as { code?: unknown }).code ?? "")
+      : "";
+  if (
+    code.startsWith("SQLITE_") ||
+    code.startsWith("ERR_") ||
+    code === "ENOENT" ||
+    code === "EACCES"
+  ) {
+    return true;
+  }
+  const message = err instanceof Error ? err.message : String(err);
+  return /SQLITE_|ENOENT|EACCES|LibsqlError/i.test(message);
+}
+
 export function handleApiError(err: unknown): NextResponse {
   if (err instanceof HttpBadRequestError) {
     return NextResponse.json({ error: err.message }, { status: err.status });
@@ -62,6 +96,14 @@ export function handleApiError(err: unknown): NextResponse {
         openTasks: err.openTasks,
       },
       { status: 409 },
+    );
+  }
+  if (isInternalSystemError(err)) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[api] unexpected error:", msg);
+    return NextResponse.json(
+      { error: "Internal server error." },
+      { status: 500 },
     );
   }
   const message = err instanceof Error ? err.message : String(err);

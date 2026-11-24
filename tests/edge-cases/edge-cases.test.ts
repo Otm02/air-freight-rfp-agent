@@ -27,6 +27,11 @@ import {
   type Flight,
   type Lane,
 } from "../../src/domain";
+import {
+  handleApiError,
+  HttpBadRequestError,
+  parseJsonBody,
+} from "../../src/lib/api-helpers";
 import { LlmClient, type StructuredTransport } from "../../src/llm";
 import {
   approveAndSendQuote,
@@ -673,5 +678,29 @@ describe("Edge cases: malformed inputs, unreachable networks, LLM failures, miss
       .from(meetings)
       .where(eq(meetings.proposalId, draft.proposalId));
     assert.equal(bookedMeetings.length, 1);
+  });
+
+  it("sanitizes internal system errors to HTTP 500 and rejects invalid JSON bodies cleanly", async () => {
+    const badJsonReq = new Request("http://localhost/api/rfps", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{not valid json",
+    });
+
+    await assert.rejects(
+      parseJsonBody(badJsonReq),
+      (err: unknown) => err instanceof HttpBadRequestError && err.status === 400,
+    );
+
+    const dbErr = Object.assign(new Error("SQLITE_BUSY: database is locked"), {
+      code: "SQLITE_BUSY",
+    });
+    const sysRes = handleApiError(dbErr);
+    assert.equal(sysRes.status, 500);
+    const sysBody = (await sysRes.json()) as { error: string };
+    assert.equal(sysBody.error, "Internal server error.");
+
+    const domainRes = handleApiError(new Error("Manual pricePerTonUsd out of bounds."));
+    assert.equal(domainRes.status, 400);
   });
 });

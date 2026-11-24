@@ -5,6 +5,7 @@ import {
   getLlmModeFromRequest,
   handleApiError,
   HttpBadRequestError,
+  parseJsonBody,
 } from "@/lib/api-helpers";
 import {
   createRfp,
@@ -14,6 +15,17 @@ import {
 } from "@/orchestrator";
 
 export const dynamic = "force-dynamic";
+
+const MAX_XLSX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+function hasZipMagicBytes(bytes: Uint8Array): boolean {
+  return (
+    bytes.byteLength >= 4 &&
+    bytes[0] === 0x50 &&
+    bytes[1] === 0x4b &&
+    (bytes[2] === 0x03 || bytes[2] === 0x05)
+  );
+}
 
 const CreatePresetSchema = z.object({
   mode: z.literal("preset"),
@@ -37,7 +49,7 @@ const CreateCustomSchema = z.object({
         destination: z.string().min(3),
         tons: z.coerce.number().positive(),
         maxTransitDays: z.coerce.number().int().positive(),
-        rawEmail: z.string().min(3),
+        rawEmail: z.string(),
       }),
     )
     .min(1),
@@ -69,7 +81,21 @@ export async function POST(request: Request) {
       if (!(file instanceof File)) {
         throw new HttpBadRequestError("Missing .xlsx file upload.");
       }
+      if (file.size === 0) {
+        throw new HttpBadRequestError("Uploaded .xlsx file is empty.");
+      }
+      if (file.size > MAX_XLSX_UPLOAD_BYTES) {
+        throw new HttpBadRequestError(
+          "Uploaded .xlsx file exceeds the 10 MB size limit.",
+          413,
+        );
+      }
       const bytes = new Uint8Array(await file.arrayBuffer());
+      if (!hasZipMagicBytes(bytes)) {
+        throw new HttpBadRequestError(
+          "Uploaded file is not a valid .xlsx (ZIP) workbook.",
+        );
+      }
       llmMode = getLlmModeFromRequest(request, formData.get("llmMode"));
       rfpId = await createRfp(db, {
         mode: "xlsx",
@@ -83,7 +109,7 @@ export async function POST(request: Request) {
         llmMode,
       });
     } else {
-      const body: unknown = await request.json();
+      const body = await parseJsonBody(request);
       const presetParsed = CreatePresetSchema.safeParse(body);
       if (presetParsed.success) {
         llmMode = getLlmModeFromRequest(request, presetParsed.data.llmMode);
